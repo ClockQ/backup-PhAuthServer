@@ -1,42 +1,46 @@
 package main
 
 import (
-  "fmt"
-  "os"
-  "net/http"
+	"os"
+	"log"
+	"net/http"
+	"github.com/manyminds/api2go"
+	"github.com/julienschmidt/httprouter"
 
-  "github.com/alfredyang1986/BmServiceDef/BmConfig"
-  "github.com/alfredyang1986/BmServiceDef/BmPodsDefine"
-  "github.com/alfredyang1986/BmServiceDef/BmApiResolver"
+	"github.com/alfredyang1986/BmServiceDef/BmConfig"
+	"github.com/alfredyang1986/BmServiceDef/BmPodsDefine"
+	"github.com/alfredyang1986/BmServiceDef/BmApiResolver"
 
-  "github.com/PharbersDeveloper/PhAuthServer/PhFactory"
+	"github.com/PharbersDeveloper/PhAuthServer/PhFactory"
 )
 
 func main() {
-  version := "v0"
-  prodEnv := "NTM_HOME"
-  fmt.Println("NTM pods archi begins, version =", version)
+	const (
+		version  = "v0"
+		confHome = "PH_AUTH_HOME"
+	)
+	os.Setenv(confHome, "resources")
+	log.Println("Pharbers Auth Server begins, version =", version)
 
-  fmt.Println("This is Pharbers Authorization Server")
-  fac := NtmFactory.NtmTable{}
-  var pod = BmPodsDefine.Pod{Name: "Pharbers Auth", Factory: fac}
-  ntmHome := os.Getenv(prodEnv)
-  pod.RegisterSerFromYAML(ntmHome + "/resource/service-def.yaml")
+	fac := PhFactory.PhTable{}
+	var pod = BmPodsDefine.Pod{Name: "Pharbers Auth", Factory: fac}
+	prodEnv := os.Getenv(confHome)
+	pod.RegisterSerFromYAML(prodEnv + "/resource/service-def.yaml")
 
-  var bmRouter BmConfig.BmRouterConfig
-  bmRouter.GenerateConfig(prodEnv)
+	var phRouter BmConfig.BmRouterConfig
+	phRouter.GenerateConfig(confHome)
 
-  addr := bmRouter.Host + ":" + bmRouter.Port
-  fmt.Println("Listening on ", addr)
-  api := api2go.NewAPIWithResolver(version, &BmApiResolver.RequestURL{Addr: addr})
-  pod.RegisterAllResource(api)
+	addr := phRouter.Host + ":" + phRouter.Port
+	log.Println("Pharbers Auth Server Listening on", addr)
+	api := api2go.NewAPIWithResolver(version, &BmApiResolver.RequestURL{Addr: addr})
+	pod.RegisterAllResource(api)
 
-  pod.RegisterAllFunctions(version, api)
-  pod.RegisterAllMiddleware(api)
+	pod.RegisterAllFunctions(version, api)
+	pod.RegisterAllMiddleware(api)
 
-  handler := api.Handler().(*httprouter.Router)
-  pod.RegisterPanicHandler(handler)
-  http.ListenAndServe(":"+bmRouter.Port, handler)
+	handler := api.Handler().(*httprouter.Router)
+	pod.RegisterPanicHandler(handler)
+	http.ListenAndServe(":"+phRouter.Port, handler)
 
-  fmt.Println("NTM pods archi ends, version =", version)
+	log.Println("Pharbers Auth Server begins, version =", version)
 }

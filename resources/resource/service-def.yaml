@@ -1,0 +1,85 @@
+models:
+- PhAccount
+
+storages:
+- name: PhAccountStorage
+  method: NewAccountStorage
+  daemons:
+  - BmMongodbDaemon
+
+resources:
+- name: PhAccountResource
+  method: NewAccountResource
+  storages:
+  - PhAccountStorage
+
+services:
+#- name: ph-account
+#  model: PhAccount
+#  resource: PhAccountResource
+
+functions:
+- name: PhLoginPageHandler
+  create: NewLoginPageHandler
+  method: Login
+  http: GET
+  args:
+  - static/login.html
+- name: PhAuthPageHandler
+  create: NewAuthPageHandler
+  method: Auth
+  http: GET
+  args:
+  - static/auth.html
+- name: PhAccountHandler
+  create: NewAccountHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: AccountValidation
+  http: POST
+  args:
+  - Auth
+- name: PhTokenHandler
+  create: NewTokenHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: Token
+  http: POST
+- name: PhAuthorizeHandler
+  create: NewAuthorizeHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: Authorize
+  http: GET
+
+middlewares:
+#- name: NtmCheckTokenMiddleware
+#  create: NewCheckTokenMiddleware
+#  daemons:
+#  - BmRedisDaemon
+#  args:
+#  - name
+
+panic:
+  name: PhCommonPanicHandle
+  create: NewCommonPanicHandle
+
+daemons:
+- name: BmMongodbDaemon
+  method: NewMongoDBDaemon
+  args:
+    # host: primary
+    host: 123.56.179.133
+    port: 5555
+    database: pharbers-auth
+- name: BmRedisDaemon
+  method: NewRedisDBDaemon
+  args:
+    # host: redis
+    host: 123.56.179.133
+    port: 6378
+    password:
+    database: 0
