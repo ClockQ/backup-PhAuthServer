@@ -1,8 +1,12 @@
 package PhServer
 
 import (
+	"time"
+	"encoding/json"
 	"gopkg.in/oauth2.v3"
+	"gopkg.in/oauth2.v3/models"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/uuid"
 )
 
 // NewAuthorizeCodeTokenStore create a token store instance based on redis
@@ -21,38 +25,35 @@ type PhAuthorizeCodeTokenStore struct {
 
 // Create create and store the new token information
 func (ts *PhAuthorizeCodeTokenStore) Create(info oauth2.TokenInfo) (err error) {
-	//ct := time.Now()
-	//jv, err := json.Marshal(info)
-	//if err != nil {
-	//	return
-	//}
-	//err = ts.db.Update(func(tx *buntdb.Tx) (err error) {
-	//	if code := info.GetCode(); code != "" {
-	//		_, _, err = tx.Set(code, string(jv), &buntdb.SetOptions{Expires: true, TTL: info.GetCodeExpiresIn()})
-	//		return
-	//	}
-	//
-	//	basicID := uuid.Must(uuid.NewRandom()).String()
-	//	aexp := info.GetAccessExpiresIn()
-	//	rexp := aexp
-	//	if refresh := info.GetRefresh(); refresh != "" {
-	//		rexp = info.GetRefreshCreateAt().Add(info.GetRefreshExpiresIn()).Sub(ct)
-	//		if aexp.Seconds() > rexp.Seconds() {
-	//			aexp = rexp
-	//		}
-	//		_, _, err = tx.Set(refresh, basicID, &buntdb.SetOptions{Expires: true, TTL: rexp})
-	//		if err != nil {
-	//			return
-	//		}
-	//	}
-	//	_, _, err = tx.Set(basicID, string(jv), &buntdb.SetOptions{Expires: true, TTL: rexp})
-	//	if err != nil {
-	//		return
-	//	}
-	//	_, _, err = tx.Set(info.GetAccess(), basicID, &buntdb.SetOptions{Expires: true, TTL: aexp})
-	//	return
-	//})
-	return
+	ct := time.Now()
+	jv, err := json.Marshal(info)
+	if err != nil {
+		return
+	}
+
+	client := ts.rdb.GetRedisClient()
+	defer client.Close()
+
+	if code := info.GetCode(); code != "" {
+		client.Set(code, string(jv), info.GetCodeExpiresIn())
+		return
+	} else {
+		basicID := uuid.Must(uuid.NewRandom()).String()
+		aexp := info.GetAccessExpiresIn()
+		rexp := aexp
+		if refresh := info.GetRefresh(); refresh != "" {
+			rexp = info.GetRefreshCreateAt().Add(info.GetRefreshExpiresIn()).Sub(ct)
+			if aexp.Seconds() > rexp.Seconds() {
+				aexp = rexp
+			}
+			client.Set(refresh, basicID, rexp)
+		}
+
+		client.Set(basicID, string(jv), rexp)
+		client.Set(info.GetAccess(), basicID, aexp)
+
+		return
+	}
 }
 
 // remove key
@@ -87,25 +88,19 @@ func (ts *PhAuthorizeCodeTokenStore) RemoveByRefresh(refresh string) (err error)
 }
 
 func (ts *PhAuthorizeCodeTokenStore) getData(key string) (ti oauth2.TokenInfo, err error) {
-	//verr := ts.db.View(func(tx *buntdb.Tx) (err error) {
-	//	jv, err := tx.Get(key)
-	//	if err != nil {
-	//		return
-	//	}
-	//	var tm models.Token
-	//	err = json.Unmarshal([]byte(jv), &tm)
-	//	if err != nil {
-	//		return
-	//	}
-	//	ti = &tm
-	//	return
-	//})
-	//if verr != nil {
-	//	if verr == buntdb.ErrNotFound {
-	//		return
-	//	}
-	//	err = verr
-	//}
+	client := ts.rdb.GetRedisClient()
+	defer client.Close()
+
+	jv, err := client.Get(key).Result()
+	if err != nil {
+		return
+	}
+	var tm models.Token
+	err = json.Unmarshal([]byte(jv), &tm)
+	if err != nil {
+		return
+	}
+	ti = &tm
 	return
 }
 
@@ -129,7 +124,7 @@ func (ts *PhAuthorizeCodeTokenStore) getBasicID(key string) (basicID string, err
 
 // GetByCode use the authorization code for token information data
 func (ts *PhAuthorizeCodeTokenStore) GetByCode(code string) (ti oauth2.TokenInfo, err error) {
-	//ti, err = ts.getData(code)
+	ti, err = ts.getData(code)
 	return
 }
 

@@ -9,7 +9,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"net/http"
-	)
+		)
 
 var authServer *server.Server
 
@@ -28,7 +28,7 @@ func NewAuthorizeCodeManager(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis, aut
 
 func NewAuthorizeCodeServer(manager oauth2.Manager) (srv *server.Server) {
 	srv = server.NewServer(server.NewConfig(), manager)
-	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
+	srv.SetUserAuthorizationHandler(userAuthorizeHandler(srv))
 
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
 		log.Println("Internal Error:", err.Error())
@@ -43,7 +43,7 @@ func NewAuthorizeCodeServer(manager oauth2.Manager) (srv *server.Server) {
 
 func GetInstance(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis) *server.Server {
 	if authServer == nil {
-		log.Println("Start ===> Generate AuthorizeCode Server")
+		log.Println("Start ===> AuthorizeCode Server")
 
 		manager := NewAuthorizeCodeManager(mdb, rdb, manage.DefaultAuthorizeCodeTokenCfg)
 		authServer = NewAuthorizeCodeServer(manager)
@@ -52,32 +52,17 @@ func GetInstance(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis) *server.Server 
 }
 
 
-func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-	//w.Header().Set("Location", "/v0/Login")
-	//w.WriteHeader(http.StatusFound)
-
-	//toUrl := strings.Replace(r.URL.Path, "AccountValidation", h.Args[0], -1)
-	//w.Header().Set("Location", toUrl)
-	//store, err := session.Start(nil, w, r)
-	//if err != nil {
-	//	return
-	//}
-	//
-	//uid, ok := store.Get("LoggedInUserID")
-	//if !ok {
-	//	if r.Form == nil {
-	//		r.ParseForm()
-	//	}
-	//
-	//	store.Set("ReturnUri", r.Form)
-	//	store.Save()
-	//
-
-	//}
-	//
-	//userID = uid.(string)
-	//store.Delete("LoggedInUserID")
-	//store.Save()
-	userID = "adbsafd"
+func userAuthorizeHandler(srv *server.Server) (handler func (w http.ResponseWriter, r *http.Request)(userID string, err error)) {
+	handler = func (w http.ResponseWriter, r *http.Request)(userID string, err error) {
+		//token, ok := srv.BearerAuth(r)
+		//if !ok || token == "" {
+		//	toUrl := strings.Replace(r.URL.Path, "Authorize", "Login", -1)
+		//	w.Header().Set("Location", toUrl)
+		//	w.WriteHeader(http.StatusFound)
+		//	return
+		//}
+		userID = "adbsafd"
+		return
+	}
 	return
 }
