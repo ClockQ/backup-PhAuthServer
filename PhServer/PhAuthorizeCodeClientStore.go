@@ -7,7 +7,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmModel"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
-	)
+)
 
 func NewAuthorizeCodeClientStore(mdb *BmMongodb.BmMongodb) *PhAuthorizeCodeClientStore {
 	return &PhAuthorizeCodeClientStore{
@@ -36,8 +36,21 @@ func (p *PhAuthorizeCodeClientStore) GetByID(id string) (cli oauth2.ClientInfo, 
 
 // Set set client information
 func (p *PhAuthorizeCodeClientStore) Set(cli oauth2.ClientInfo) (err error) {
+	_, err = p.SetInfo(cli)
+	return
+}
+
+// SetInfo SetInfo call by Set
+func (p *PhAuthorizeCodeClientStore) SetInfo(cli oauth2.ClientInfo) (id string, err error) {
 	model := clientInfo2Model(cli).(*PhModel.OpenClient)
-	_, err = p.mdb.InsertBmObject(model)
+	id, err = p.mdb.InsertBmObject(model)
+	return
+}
+
+// DelInfo
+func (p *PhAuthorizeCodeClientStore) DelInfo(cli oauth2.ClientInfo) (err error) {
+	model := clientInfo2Model(cli).(*PhModel.OpenClient)
+	err = p.mdb.Delete(model)
 	return
 }
 

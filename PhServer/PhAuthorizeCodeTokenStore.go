@@ -58,32 +58,27 @@ func (ts *PhAuthorizeCodeTokenStore) Create(info oauth2.TokenInfo) (err error) {
 
 // remove key
 func (ts *PhAuthorizeCodeTokenStore) remove(key string) (err error) {
-	//verr := ts.db.Update(func(tx *buntdb.Tx) (err error) {
-	//	_, err = tx.Delete(key)
-	//	return
-	//})
-	//if verr == buntdb.ErrNotFound {
-	//	return
-	//}
-	//err = verr
+	client := ts.rdb.GetRedisClient()
+	defer client.Close()
+	_, err = client.Del(key).Result()
 	return
 }
 
 // RemoveByCode use the authorization code to delete the token information
 func (ts *PhAuthorizeCodeTokenStore) RemoveByCode(code string) (err error) {
-	//err = ts.remove(code)
+	err = ts.remove(code)
 	return
 }
 
 // RemoveByAccess use the access token to delete the token information
 func (ts *PhAuthorizeCodeTokenStore) RemoveByAccess(access string) (err error) {
-	//err = ts.remove(access)
+	err = ts.remove(access)
 	return
 }
 
 // RemoveByRefresh use the refresh token to delete the token information
 func (ts *PhAuthorizeCodeTokenStore) RemoveByRefresh(refresh string) (err error) {
-	//err = ts.remove(refresh)
+	err = ts.remove(refresh)
 	return
 }
 
@@ -105,20 +100,14 @@ func (ts *PhAuthorizeCodeTokenStore) getData(key string) (ti oauth2.TokenInfo, e
 }
 
 func (ts *PhAuthorizeCodeTokenStore) getBasicID(key string) (basicID string, err error) {
-	//verr := ts.db.View(func(tx *buntdb.Tx) (err error) {
-	//	v, err := tx.Get(key)
-	//	if err != nil {
-	//		return
-	//	}
-	//	basicID = v
-	//	return
-	//})
-	//if verr != nil {
-	//	if verr == buntdb.ErrNotFound {
-	//		return
-	//	}
-	//	err = verr
-	//}
+	client := ts.rdb.GetRedisClient()
+	defer client.Close()
+
+	v, err := client.Get(key).Result()
+	if err != nil {
+		return
+	}
+	basicID = v
 	return
 }
 
@@ -130,20 +119,20 @@ func (ts *PhAuthorizeCodeTokenStore) GetByCode(code string) (ti oauth2.TokenInfo
 
 // GetByAccess use the access token for token information data
 func (ts *PhAuthorizeCodeTokenStore) GetByAccess(access string) (ti oauth2.TokenInfo, err error) {
-	//basicID, err := ts.getBasicID(access)
-	//if err != nil {
-	//	return
-	//}
-	//ti, err = ts.getData(basicID)
+	basicID, err := ts.getBasicID(access)
+	if err != nil {
+		return
+	}
+	ti, err = ts.getData(basicID)
 	return
 }
 
 // GetByRefresh use the refresh token for token information data
 func (ts *PhAuthorizeCodeTokenStore) GetByRefresh(refresh string) (ti oauth2.TokenInfo, err error) {
-	//basicID, err := ts.getBasicID(refresh)
-	//if err != nil {
-	//	return
-	//}
-	//ti, err = ts.getData(basicID)
+	basicID, err := ts.getBasicID(refresh)
+	if err != nil {
+		return
+	}
+	ti, err = ts.getData(basicID)
 	return
 }
