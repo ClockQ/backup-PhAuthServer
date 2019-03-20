@@ -1,22 +1,19 @@
 package PhHandler
 
 import (
-	"strings"
 	"io/ioutil"
 	"log"
 	"fmt"
 	"net/http"
 	"reflect"
+	"encoding/json"
+	"strings"
 	"gopkg.in/mgo.v2/bson"
 	"github.com/julienschmidt/httprouter"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"crypto/md5"
-	"io"
-	"time"
-	"encoding/json"
 )
 
 type PhAccountHandler struct {
@@ -70,7 +67,7 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 		return 1
 	}
 	bodyStr := fmt.Sprintf("%s", bodyBytes)
-	log.Println("Start ==> Account Validation =", bodyStr)
+	log.Println("Start ===> Account Validation =", bodyStr)
 
 	res := PhModel.Account{}
 	out := PhModel.Account{}
@@ -82,17 +79,23 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 	if err == nil && out.ID != "" {
 		redisDriver := h.rd.GetRedisClient()
 		defer redisDriver.Close()
-		hex := md5.New()
-		io.WriteString(hex, out.ID)
-		token := fmt.Sprintf("%x", hex.Sum(nil))
+		redisDriver.Set("LoggedInUserID", out.ID, -1)
+		//hex := md5.New()
+		//io.WriteString(hex, out.ID)
+		//token := fmt.Sprintf("%x", hex.Sum(nil))
+		//
+		//err = h.rd.PushToken(token, time.Hour*24*365)
+		//redisDriver.HSet(token+"_info", "uid", out.ID)
+		//redisDriver.HSet(token+"_info", "nickname", out.Nickname)
+		//redisDriver.Expire(token+"_info", time.Hour*24*365)
+		//
+		//out.Password = ""
+		//out.Token = token
 
-		err = h.rd.PushToken(token, time.Hour*24*365)
-		redisDriver.HSet(token+"_info", "uid", out.ID)
-		redisDriver.HSet(token+"_info", "nickname", out.Nickname)
-		redisDriver.Expire(token+"_info", time.Hour*24*365)
-
-		out.Password = ""
-		out.Token = token
+		toUrl := strings.Replace(r.URL.Path, "AccountValidation", h.Args[0], -1)
+		w.Header().Set("Location", toUrl)
+		w.WriteHeader(http.StatusFound)
+		return 0
 	} else {
 		response := map[string]interface{}{
 			"status": "error",
@@ -103,19 +106,6 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 		enc.Encode(response)
 		return 1
 	}
-
-	//store, err := session.Start(nil, w, r)
-	//if err != nil {
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return 1
-	//}
-	//
-	//store.Set("LoggedInUserID", "000000")
-	//store.Save()
-	toUrl := strings.Replace(r.URL.Path, "AccountValidation", h.Args[0], -1)
-	w.Header().Set("Location", toUrl)
-	w.WriteHeader(http.StatusFound)
-	return 0
 }
 
 func (h PhAccountHandler) GetHttpMethod() string {

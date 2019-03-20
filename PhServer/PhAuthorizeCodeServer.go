@@ -3,13 +3,13 @@ package PhServer
 import (
 	"log"
 	"gopkg.in/oauth2.v3"
-	"gopkg.in/oauth2.v3/errors"
-	"gopkg.in/oauth2.v3/manage"
+		"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"net/http"
-		)
+	"strings"
+)
 
 var authServer *server.Server
 
@@ -26,18 +26,19 @@ func NewAuthorizeCodeManager(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis, aut
 	return
 }
 
-func NewAuthorizeCodeServer(manager oauth2.Manager) (srv *server.Server) {
+func NewAuthorizeCodeServer(manager oauth2.Manager, rdb *BmRedis.BmRedis) (srv *server.Server) {
 	srv = server.NewServer(server.NewConfig(), manager)
-	srv.SetUserAuthorizationHandler(userAuthorizeHandler(srv))
+	srv.SetUserAuthorizationHandler(userAuthorizeHandler(srv, rdb))
 
-	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
-		log.Println("Internal Error:", err.Error())
-		return
-	})
+	//srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
+	//	log.Println("Internal Error:", err.Error())
+	//	return
+	//})
+	//
+	//srv.SetResponseErrorHandler(func(re *errors.Response) {
+	//	log.Println("Response Error:", re.Error.Error())
+	//})
 
-	srv.SetResponseErrorHandler(func(re *errors.Response) {
-		log.Println("Response Error:", re.Error.Error())
-	})
 	return
 }
 
@@ -46,22 +47,25 @@ func GetInstance(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis) *server.Server 
 		log.Println("Start ===> AuthorizeCode Server")
 
 		manager := NewAuthorizeCodeManager(mdb, rdb, manage.DefaultAuthorizeCodeTokenCfg)
-		authServer = NewAuthorizeCodeServer(manager)
+		authServer = NewAuthorizeCodeServer(manager, rdb)
 	}
 	return authServer
 }
 
-
-func userAuthorizeHandler(srv *server.Server) (handler func (w http.ResponseWriter, r *http.Request)(userID string, err error)) {
+func userAuthorizeHandler(srv *server.Server, rdb *BmRedis.BmRedis) (handler func (w http.ResponseWriter, r *http.Request)(userID string, err error)) {
 	handler = func (w http.ResponseWriter, r *http.Request)(userID string, err error) {
+		redisDriver := rdb.GetRedisClient()
+		defer redisDriver.Close()
+		userID, err = redisDriver.Get("LoggedInUserID").Result()
+		if err != nil || userID == "" {
 		//token, ok := srv.BearerAuth(r)
 		//if !ok || token == "" {
-		//	toUrl := strings.Replace(r.URL.Path, "Authorize", "Login", -1)
-		//	w.Header().Set("Location", toUrl)
-		//	w.WriteHeader(http.StatusFound)
-		//	return
-		//}
-		userID = "adbsafd"
+			redisDriver.Del("LoggedInUserID")
+			redisDriver.Set("ReturnUri", r.Form.Encode(), -1)
+			toUrl := strings.Replace(r.URL.Path, "Authorize", "Login", -1)
+			w.Header().Set("Location", toUrl)
+			w.WriteHeader(http.StatusFound)
+		}
 		return
 	}
 	return
