@@ -86,15 +86,23 @@ func (ts *PhAuthorizeCodeTokenStore) getData(key string) (ti oauth2.TokenInfo, e
 	client := ts.rdb.GetRedisClient()
 	defer client.Close()
 
+	r, err := client.Exists(key).Result()
+	// key not exists
+	if err != nil || r == 0 {
+		return
+	}
+
 	jv, err := client.Get(key).Result()
 	if err != nil {
 		return
 	}
+
 	var tm models.Token
 	err = json.Unmarshal([]byte(jv), &tm)
 	if err != nil {
 		return
 	}
+
 	ti = &tm
 	return
 }
@@ -102,6 +110,12 @@ func (ts *PhAuthorizeCodeTokenStore) getData(key string) (ti oauth2.TokenInfo, e
 func (ts *PhAuthorizeCodeTokenStore) getBasicID(key string) (basicID string, err error) {
 	client := ts.rdb.GetRedisClient()
 	defer client.Close()
+
+	r, err := client.Exists(key).Result()
+	// key not exists
+	if err != nil || r == 0 {
+		return
+	}
 
 	v, err := client.Get(key).Result()
 	if err != nil {
