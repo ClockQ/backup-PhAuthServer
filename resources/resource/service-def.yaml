@@ -47,6 +47,13 @@ functions:
   - BmRedisDaemon
   method: Token
   http: POST
+- name: PhTokenValidationHandler
+  create: NewTokenHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: TokenValidation
+  http: POST
 - name: PhAuthorizeHandler
   create: NewAuthorizeHandler
   daemons:

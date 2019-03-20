@@ -25,12 +25,13 @@ var PhResourceFactory = map[string]interface{}{
 }
 
 var PhFunctionFactory = map[string]interface{}{
-	"PhCommonPanicHandle": PhHandler.CommonPanicHandle{},
-	"PhLoginPageHandler":  PhHandler.PhLoginPageHandler{},
-	"PhAuthPageHandler":   PhHandler.PhAuthPageHandler{},
-	"PhAccountHandler":    PhHandler.PhAccountHandler{},
-	"PhTokenHandler":      PhHandler.PhTokenHandler{},
-	"PhAuthorizeHandler":  PhHandler.PhAuthorizeHandler{},
+	"PhCommonPanicHandle":      PhHandler.CommonPanicHandle{},
+	"PhLoginPageHandler":       PhHandler.PhLoginPageHandler{},
+	"PhAuthPageHandler":        PhHandler.PhAuthPageHandler{},
+	"PhAccountHandler":         PhHandler.PhAccountHandler{},
+	"PhTokenHandler":           PhHandler.PhTokenHandler{},
+	"PhTokenValidationHandler": PhHandler.PhTokenHandler{},
+	"PhAuthorizeHandler":       PhHandler.PhAuthorizeHandler{},
 }
 var PhMiddlewareFactory = map[string]interface{}{
 	//"NtmCheckTokenMiddleware": NtmMiddleware.NtmCheckTokenMiddleware{},

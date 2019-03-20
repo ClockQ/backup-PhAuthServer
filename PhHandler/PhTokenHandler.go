@@ -12,6 +12,8 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 
 	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
+	"time"
+	"encoding/json"
 )
 
 type PhTokenHandler struct {
@@ -66,6 +68,25 @@ func (h PhTokenHandler) Token(w http.ResponseWriter, r *http.Request, _ httprout
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	return 0
+}
+
+func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	log.Println("start ===> Validation Token")
+	token, err := h.srv.ValidationBearerToken(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return 1
+	}
+
+	data := map[string]interface{}{
+		"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
+		"client_id":  token.GetClientID(),
+		"user_id":    token.GetUserID(),
+	}
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	e.Encode(data)
 	return 0
 }
 
