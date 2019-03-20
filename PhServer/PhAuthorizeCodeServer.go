@@ -61,7 +61,6 @@ func userAuthorizeHandler(srv *server.Server, rdb *BmRedis.BmRedis) (handler fun
 			returnUri := r.Form.Encode()
 			w.Header().Set("Location", toUrl+"?"+returnUri)
 			w.WriteHeader(http.StatusFound)
-			return
 		}
 		return
 	}

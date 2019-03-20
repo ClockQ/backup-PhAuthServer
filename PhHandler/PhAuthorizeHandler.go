@@ -10,7 +10,6 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	"net/url"
 )
 
 type PhAuthorizeHandler struct {
@@ -59,11 +58,6 @@ func (h PhAuthorizeHandler) NewAuthorizeHandler(args ...interface{}) PhAuthorize
 
 func (h PhAuthorizeHandler) Authorize(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	log.Println("Start ===> Authorize Validation")
-
-	returnUri := r.Form.Encode()
-	if returnUri != "" {
-		r.Form, _ = url.ParseQuery(returnUri)
-	}
 
 	err := h.srv.HandleAuthorizeRequest(w, r)
 	if err != nil {

@@ -81,8 +81,11 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 		//_, err = pipe.Exec()
 
 		toUrl := strings.Replace(r.URL.Path, "AccountValidation", h.Args[0], -1)
-		returnUri := r.Form.Encode()
-		w.Header().Set("Location", toUrl+"?uid="+out.ID+returnUri)
+		a := r.Form
+		a.Del("username")
+		a.Del("password")
+		returnUri := a.Encode()
+		w.Header().Set("Location", toUrl+"?uid="+out.ID+"&"+returnUri)
 		w.WriteHeader(http.StatusFound)
 		return 0
 	} else {
