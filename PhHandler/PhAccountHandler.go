@@ -1,9 +1,6 @@
 package PhHandler
 
 import (
-	"io/ioutil"
-	"log"
-	"fmt"
 	"net/http"
 	"reflect"
 	"encoding/json"
@@ -14,7 +11,8 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-)
+	"log"
+	)
 
 type PhAccountHandler struct {
 	Method     string
@@ -60,40 +58,31 @@ func (h PhAccountHandler) NewAccountHandler(args ...interface{}) PhAccountHandle
 }
 
 func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("Error reading body: %v", err)
-		http.Error(w, "can't read body", http.StatusBadRequest)
-		return 1
-	}
-	bodyStr := fmt.Sprintf("%s", bodyBytes)
-	log.Println("Start ===> Account Validation =", bodyStr)
+	log.Println("Start ===> Account Validation")
+
+	_ = r.PostForm
+	email := r.FormValue("username")
+	pwd := r.FormValue("password")
 
 	res := PhModel.Account{}
 	out := PhModel.Account{}
-	email := "zyqi@pharbers.com"
-	pwd := "4297f44b13955235245b2497399d7a93"
+	email = "zyqi@pharbers.com"
+	pwd = "4297f44b13955235245b2497399d7a93"
 	cond := bson.M{"email": email, "password": pwd}
-	err = h.db.FindOneByCondition(&res, &out, cond)
+	err := h.db.FindOneByCondition(&res, &out, cond)
 
 	if err == nil && out.ID != "" {
-		redisDriver := h.rd.GetRedisClient()
-		defer redisDriver.Close()
-		redisDriver.Set("LoggedInUserID", out.ID, -1)
-		//hex := md5.New()
-		//io.WriteString(hex, out.ID)
-		//token := fmt.Sprintf("%x", hex.Sum(nil))
-		//
-		//err = h.rd.PushToken(token, time.Hour*24*365)
-		//redisDriver.HSet(token+"_info", "uid", out.ID)
-		//redisDriver.HSet(token+"_info", "nickname", out.Nickname)
-		//redisDriver.Expire(token+"_info", time.Hour*24*365)
-		//
-		//out.Password = ""
-		//out.Token = token
+		//redisDriver := h.rd.GetRedisClient()
+		//defer redisDriver.Close()
+		//pipe := redisDriver.Pipeline()
+		//exp := time.Hour * 24 * 3
+		//pipe.HSet(out.ID, "nickname", out.Nickname)
+		//pipe.Expire(out.ID, exp)
+		//_, err = pipe.Exec()
 
 		toUrl := strings.Replace(r.URL.Path, "AccountValidation", h.Args[0], -1)
-		w.Header().Set("Location", toUrl)
+		returnUri := r.Form.Encode()
+		w.Header().Set("Location", toUrl+"?uid="+out.ID+returnUri)
 		w.WriteHeader(http.StatusFound)
 		return 0
 	} else {

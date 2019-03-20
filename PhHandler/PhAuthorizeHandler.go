@@ -60,17 +60,12 @@ func (h PhAuthorizeHandler) NewAuthorizeHandler(args ...interface{}) PhAuthorize
 func (h PhAuthorizeHandler) Authorize(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	log.Println("Start ===> Authorize Validation")
 
-	var form url.Values
-	redisDriver := h.rd.GetRedisClient()
-	defer redisDriver.Close()
-	returnUri, err := redisDriver.Get("ReturnUri").Result()
+	returnUri := r.Form.Encode()
 	if returnUri != "" {
-		form, _ = url.ParseQuery(returnUri)
+		r.Form, _ = url.ParseQuery(returnUri)
 	}
-	r.Form = form
-	redisDriver.Del("ReturnUri")
 
-	err = h.srv.HandleAuthorizeRequest(w, r)
+	err := h.srv.HandleAuthorizeRequest(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}

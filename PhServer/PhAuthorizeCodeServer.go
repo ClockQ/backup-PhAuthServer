@@ -3,12 +3,12 @@ package PhServer
 import (
 	"log"
 	"net/http"
-	"strings"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
+	"strings"
 )
 
 var authServer *server.Server
@@ -54,17 +54,14 @@ func GetInstance(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis) *server.Server 
 
 func userAuthorizeHandler(srv *server.Server, rdb *BmRedis.BmRedis) (handler func(w http.ResponseWriter, r *http.Request) (userID string, err error)) {
 	handler = func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-		redisDriver := rdb.GetRedisClient()
-		defer redisDriver.Close()
-		userID, err = redisDriver.Get("LoggedInUserID").Result()
-		redisDriver.Del("LoggedInUserID")
-		if err != nil || userID == "" {
-			//token, ok := srv.BearerAuth(r)
-			//if !ok || token == "" {
-			redisDriver.Set("ReturnUri", r.Form.Encode(), -1)
+		userID = r.FormValue("uid")
+
+		if userID == "" {
 			toUrl := strings.Replace(r.URL.Path, "Authorize", "Login", -1)
-			w.Header().Set("Location", toUrl)
+			returnUri := r.Form.Encode()
+			w.Header().Set("Location", toUrl+"?"+returnUri)
 			w.WriteHeader(http.StatusFound)
+			return
 		}
 		return
 	}
