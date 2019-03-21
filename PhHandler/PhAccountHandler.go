@@ -11,8 +11,10 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
 	"log"
-	)
+	"time"
+)
 
 type PhAccountHandler struct {
 	Method     string
@@ -63,41 +65,50 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 	_ = r.PostForm
 	email := r.FormValue("username")
 	pwd := r.FormValue("password")
+	scope := r.FormValue("scope")
 
 	res := PhModel.Account{}
 	out := PhModel.Account{}
-	email = "zyqi@pharbers.com"
-	pwd = "4297f44b13955235245b2497399d7a93"
 	cond := bson.M{"email": email, "password": pwd}
 	err := h.db.FindOneByCondition(&res, &out, cond)
 
-	if err == nil && out.ID != "" {
-		//redisDriver := h.rd.GetRedisClient()
-		//defer redisDriver.Close()
-		//pipe := redisDriver.Pipeline()
-		//exp := time.Hour * 24 * 3
-		//pipe.HSet(out.ID, "nickname", out.Nickname)
-		//pipe.Expire(out.ID, exp)
-		//_, err = pipe.Exec()
+	// Validation Scope
+	var bl bool
+	if array.IsExistItem("ALL", strings.Split(out.Scope, "#")) {
+		bl = true
+	} else {
+		bl = array.IsExistItem(scope, strings.Split(out.Scope, "#"))
+	}
+
+	if err == nil && out.ID != "" && bl == true {
+		redisDriver := h.rd.GetRedisClient()
+		defer redisDriver.Close()
+		pipe := redisDriver.Pipeline()
+		exp := time.Hour * 24 * 3
+		pipe.HSet(out.ID, "nickname", out.Nickname)
+		pipe.Expire(out.ID, exp)
+		_, err = pipe.Exec()
 
 		toUrl := strings.Replace(r.URL.Path, "AccountValidation", h.Args[0], -1)
 		a := r.Form
 		a.Del("username")
 		a.Del("password")
+		a.Set("scope", out.Scope)
 		returnUri := a.Encode()
 		w.Header().Set("Location", toUrl+"?uid="+out.ID+"&"+returnUri)
 		w.WriteHeader(http.StatusFound)
 		return 0
-	} else {
-		response := map[string]interface{}{
-			"status": "error",
-			"result": nil,
-			"error":  "账户或密码错误！",
-		}
-		enc := json.NewEncoder(w)
-		enc.Encode(response)
-		return 1
 	}
+
+	response := map[string]interface{}{
+		"status": "error",
+		"result": nil,
+		"error":  "账户或密码错误！",
+	}
+	enc := json.NewEncoder(w)
+	enc.Encode(response)
+	return 1
+
 }
 
 func (h PhAccountHandler) GetHttpMethod() string {

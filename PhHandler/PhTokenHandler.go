@@ -83,6 +83,7 @@ func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, 
 		"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
 		"client_id":  token.GetClientID(),
 		"user_id":    token.GetUserID(),
+		"scope":      token.GetScope(),
 	}
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
