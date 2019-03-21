@@ -58,7 +58,7 @@ func (h PhAuthorizeHandler) NewAuthorizeHandler(args ...interface{}) PhAuthorize
 func (h PhAuthorizeHandler) Authorize(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	err := h.srv.HandleAuthorizeRequest(w, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		panic(err.Error())
 	}
 	return 0
 }

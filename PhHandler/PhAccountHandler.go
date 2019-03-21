@@ -3,7 +3,6 @@ package PhHandler
 import (
 	"net/http"
 	"reflect"
-	"encoding/json"
 	"strings"
 	"gopkg.in/mgo.v2/bson"
 	"github.com/julienschmidt/httprouter"
@@ -11,8 +10,8 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"log"
 	"time"
+	"errors"
 )
 
 type PhAccountHandler struct {
@@ -59,8 +58,6 @@ func (h PhAccountHandler) NewAccountHandler(args ...interface{}) PhAccountHandle
 }
 
 func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	log.Println("Start ===> Account Validation")
-
 	_ = r.PostForm
 	email := r.FormValue("username")
 	pwd := r.FormValue("password")
@@ -69,6 +66,9 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 	out := PhModel.Account{}
 	cond := bson.M{"email": email, "password": pwd}
 	err := h.db.FindOneByCondition(&res, &out, cond)
+	if err != nil {
+		err = errors.New("账户或密码错误")
+	}
 
 	if err == nil && out.ID != "" {
 		redisDriver := h.rd.GetRedisClient()
@@ -86,15 +86,7 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 		return 0
 	}
 
-	response := map[string]interface{}{
-		"status": "error",
-		"result": nil,
-		"error":  "账户或密码错误！",
-	}
-	enc := json.NewEncoder(w)
-	enc.Encode(response)
-	return 1
-
+	panic(err.Error())
 }
 
 func (h PhAccountHandler) GetHttpMethod() string {

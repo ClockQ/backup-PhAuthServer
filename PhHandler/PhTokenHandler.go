@@ -1,8 +1,7 @@
 package PhHandler
 
 import (
-	"log"
-	"net/http"
+		"net/http"
 	"reflect"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/oauth2.v3/server"
@@ -64,21 +63,17 @@ func (h PhTokenHandler) NewTokenHandler(args ...interface{}) PhTokenHandler {
 }
 
 func (h PhTokenHandler) Token(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	log.Println("start ===> Generate Token")
-
 	err := h.srv.HandleTokenRequest(w, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		panic(err.Error())
 	}
 	return 0
 }
 
 func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	log.Println("start ===> Validation Token")
 	token, err := h.srv.ValidationBearerToken(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return 1
+		panic(err.Error())
 	}
 
 	res := PhModel.Account{}

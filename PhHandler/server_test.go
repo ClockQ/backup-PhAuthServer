@@ -19,7 +19,8 @@ var (
 	tsrv         *httptest.Server
 	csrv         *httptest.Server
 	clientID     = "5c90db71eeefcc082c0823b2"
-	clientSecret = "11111111"
+	clientSecret = "5c90db71eeefcc082c0823b2"
+	uid          = "5c4552455ee2dd7c36a94a9e"
 )
 
 func init() {
@@ -84,6 +85,7 @@ func testClient(t *testing.T, w http.ResponseWriter, r *http.Request, e *httpexp
 			return
 		}
 		resObj := e.POST("/token").
+			WithFormField("uid", r.Form.Get("uid")).
 			WithFormField("redirect_uri", csrv.URL+"/oauth2").
 			WithFormField("code", code).
 			WithFormField("grant_type", "authorization_code").
@@ -118,6 +120,7 @@ func TestAuthorizeCode(t *testing.T) {
 	})
 
 	e.GET("/authorize").
+		WithQuery("uid", uid).
 		WithQuery("response_type", "code").
 		WithQuery("client_id", clientID).
 		WithQuery("scope", "all").

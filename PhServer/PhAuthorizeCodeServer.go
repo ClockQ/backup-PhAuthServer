@@ -7,12 +7,13 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
-	"gopkg.in/oauth2.v3/errors"
+	oerrors "gopkg.in/oauth2.v3/errors"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
-)
+	"errors"
+	)
 
 var authServer *server.Server
 
@@ -34,7 +35,6 @@ func NewAuthorizeCodeServer(manager oauth2.Manager, mdb *BmMongodb.BmMongodb, rd
 	srv.SetAuthorizeScopeHandler(authorizeScopeHandler(mdb))
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler(rdb))
 	srv.SetPasswordAuthorizationHandler(passwordAuthorizationHandler(mdb, rdb))
-
 	return
 }
 
@@ -67,6 +67,11 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 	handler = func(w http.ResponseWriter, r *http.Request) (scope string, err error) {
 		// Validation Scope
 		uid := r.FormValue("uid")
+		if !bson.IsObjectIdHex(uid){
+			err = errors.New(uid + " isn't ObjectIdHex")
+			return
+		}
+
 		res := PhModel.Account{}
 		out := PhModel.Account{}
 		cond := bson.M{"_id": bson.ObjectIdHex(uid)}
@@ -80,7 +85,7 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 		}
 
 		if bl == false {
-			err = errors.ErrInvalidScope
+			err = oerrors.ErrInvalidScope
 		}
 
 		return
