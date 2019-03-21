@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/oauth2.v3/server"
+	"gopkg.in/mgo.v2/bson"
 
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
@@ -14,6 +15,7 @@ import (
 	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
 	"time"
 	"encoding/json"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 )
 
 type PhTokenHandler struct {
@@ -79,11 +81,18 @@ func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, 
 		return 1
 	}
 
+	res := PhModel.Account{}
+	out := PhModel.Account{}
+	cond := bson.M{"_id": bson.ObjectIdHex(token.GetUserID())}
+	err = h.db.FindOneByCondition(&res, &out, cond)
+
 	data := map[string]interface{}{
-		"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
-		"client_id":  token.GetClientID(),
-		"user_id":    token.GetUserID(),
-		"scope":      token.GetScope(),
+		"expires_in":         int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
+		"refresh_expires_in": token.GetRefreshExpiresIn(),
+		"client_id":          token.GetClientID(),
+		"user_id":            token.GetUserID(),
+		"scope":              token.GetScope(),
+		"all_scope":          out.Scope,
 	}
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")

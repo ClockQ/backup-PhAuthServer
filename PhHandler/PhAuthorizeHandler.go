@@ -1,7 +1,6 @@
 package PhHandler
 
 import (
-	"log"
 	"net/http"
 	"reflect"
 	"gopkg.in/oauth2.v3/server"
@@ -57,8 +56,6 @@ func (h PhAuthorizeHandler) NewAuthorizeHandler(args ...interface{}) PhAuthorize
 }
 
 func (h PhAuthorizeHandler) Authorize(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	log.Println("Start ===> Authorize Validation")
-
 	err := h.srv.HandleAuthorizeRequest(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

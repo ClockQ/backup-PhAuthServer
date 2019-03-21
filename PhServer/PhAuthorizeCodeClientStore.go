@@ -7,6 +7,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmModel"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func NewAuthorizeCodeClientStore(mdb *BmMongodb.BmMongodb) *PhAuthorizeCodeClientStore {
@@ -23,6 +24,11 @@ type PhAuthorizeCodeClientStore struct {
 
 // GetByID according to the ID for the client information
 func (p *PhAuthorizeCodeClientStore) GetByID(id string) (cli oauth2.ClientInfo, err error) {
+	if !bson.IsObjectIdHex(id){
+		err = errors.New(id + " isn't ObjectIdHex")
+		return
+	}
+
 	in := PhModel.OpenClient{ID: id}
 	out := PhModel.OpenClient{ID: id}
 	err = p.mdb.FindOne(&in, &out)

@@ -1,18 +1,17 @@
 package PhServer
 
 import (
-	"log"
-	"net/http"
+		"net/http"
 	"strings"
 	"gopkg.in/oauth2.v3"
+	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/server"
 	"gopkg.in/oauth2.v3/errors"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
-	"gopkg.in/mgo.v2/bson"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"time"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
 )
 
 var authServer *server.Server
@@ -32,25 +31,15 @@ func NewAuthorizeCodeManager(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis, aut
 
 func NewAuthorizeCodeServer(manager oauth2.Manager, mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis) (srv *server.Server) {
 	srv = server.NewServer(server.NewConfig(), manager)
+	srv.SetAuthorizeScopeHandler(authorizeScopeHandler(mdb))
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler(rdb))
 	srv.SetPasswordAuthorizationHandler(passwordAuthorizationHandler(mdb, rdb))
-
-	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
-		log.Println("Internal Error:", err.Error())
-		return
-	})
-
-	srv.SetResponseErrorHandler(func(re *errors.Response) {
-		log.Println("Response Error:", re.Error.Error())
-	})
 
 	return
 }
 
 func GetInstance(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis) *server.Server {
 	if authServer == nil {
-		log.Println("Start ===> AuthorizeCode Server")
-
 		manager := NewAuthorizeCodeManager(mdb, rdb, manage.DefaultAuthorizeCodeTokenCfg)
 		authServer = NewAuthorizeCodeServer(manager, mdb, rdb)
 	}
@@ -60,14 +49,40 @@ func GetInstance(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis) *server.Server 
 func userAuthorizeHandler(rdb *BmRedis.BmRedis) (handler func(w http.ResponseWriter, r *http.Request) (userID string, err error)) {
 	handler = func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
 		userID = r.FormValue("uid")
-		result, err := rdb.GetRedisClient().Exists(userID).Result()
-
+		redisDriver := rdb.GetRedisClient()
+		result, err := redisDriver.Exists(userID).Result()
 		if userID == "" || result == 0 {
 			toUrl := strings.Replace(r.URL.Path, "Authorize", "Login", -1)
 			returnUri := r.Form.Encode()
 			w.Header().Set("Location", toUrl+"?"+returnUri)
 			w.WriteHeader(http.StatusFound)
 		}
+		redisDriver.Del(userID)
+		return
+	}
+	return
+}
+
+func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.ResponseWriter, r *http.Request) (scope string, err error)) {
+	handler = func(w http.ResponseWriter, r *http.Request) (scope string, err error) {
+		// Validation Scope
+		uid := r.FormValue("uid")
+		res := PhModel.Account{}
+		out := PhModel.Account{}
+		cond := bson.M{"_id": bson.ObjectIdHex(uid)}
+		err = mdb.FindOneByCondition(&res, &out, cond)
+
+		bl := false
+		if array.IsExistItem("ALL", strings.Split(out.Scope, "#")) {
+			bl = true
+		} else {
+			bl = array.IsExistItem(scope, strings.Split(out.Scope, "#"))
+		}
+
+		if bl == false {
+			err = errors.ErrInvalidScope
+		}
+
 		return
 	}
 	return
@@ -81,15 +96,6 @@ func passwordAuthorizationHandler(mdb *BmMongodb.BmMongodb, rdb *BmRedis.BmRedis
 		err = mdb.FindOneByCondition(&res, &out, cond)
 
 		userID = out.ID
-		if err == nil && userID!= "" {
-			redisDriver := rdb.GetRedisClient()
-			defer redisDriver.Close()
-			pipe := redisDriver.Pipeline()
-			exp := time.Hour * 24 * 3
-			pipe.HSet(userID, "nickname", out.Nickname)
-			pipe.Expire(userID, exp)
-			_, err = pipe.Exec()
-		}
 		return
 	}
 	return

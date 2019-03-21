@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"github.com/julienschmidt/httprouter"
 	"os"
-	"log"
 )
 
 type PhAuthPageHandler struct {
@@ -36,7 +35,6 @@ func (h PhAuthPageHandler) NewAuthPageHandler(args ...interface{}) PhAuthPageHan
 }
 
 func (h PhAuthPageHandler) Auth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	log.Println("Start ===> Load `Auth` Page")
 	file, err := os.Open(h.Args[0])
 	if err != nil {
 		http.Error(w, err.Error(), 500)

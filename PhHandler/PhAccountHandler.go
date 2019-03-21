@@ -11,7 +11,6 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
 	"log"
 	"time"
 )
@@ -65,35 +64,22 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 	_ = r.PostForm
 	email := r.FormValue("username")
 	pwd := r.FormValue("password")
-	scope := r.FormValue("scope")
 
 	res := PhModel.Account{}
 	out := PhModel.Account{}
 	cond := bson.M{"email": email, "password": pwd}
 	err := h.db.FindOneByCondition(&res, &out, cond)
 
-	// Validation Scope
-	var bl bool
-	if array.IsExistItem("ALL", strings.Split(out.Scope, "#")) {
-		bl = true
-	} else {
-		bl = array.IsExistItem(scope, strings.Split(out.Scope, "#"))
-	}
-
-	if err == nil && out.ID != "" && bl == true {
+	if err == nil && out.ID != "" {
 		redisDriver := h.rd.GetRedisClient()
 		defer redisDriver.Close()
-		pipe := redisDriver.Pipeline()
-		exp := time.Hour * 24 * 3
-		pipe.HSet(out.ID, "nickname", out.Nickname)
-		pipe.Expire(out.ID, exp)
-		_, err = pipe.Exec()
+		exp := time.Second * 5
+		redisDriver.Set(out.ID, true, exp)
 
 		toUrl := strings.Replace(r.URL.Path, "AccountValidation", h.Args[0], -1)
 		a := r.Form
 		a.Del("username")
 		a.Del("password")
-		a.Set("scope", out.Scope)
 		returnUri := a.Encode()
 		w.Header().Set("Location", toUrl+"?uid="+out.ID+"&"+returnUri)
 		w.WriteHeader(http.StatusFound)

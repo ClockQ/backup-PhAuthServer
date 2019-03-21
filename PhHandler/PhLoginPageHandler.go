@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"github.com/julienschmidt/httprouter"
 	"os"
-	"log"
 )
 
 type PhLoginPageHandler struct {
@@ -36,7 +35,6 @@ func (h PhLoginPageHandler) NewLoginPageHandler(args ...interface{}) PhLoginPage
 }
 
 func (h PhLoginPageHandler) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
-	log.Println("Start ===> Load `Login` Page")
 	file, err := os.Open(h.Args[0])
 	if err != nil {
 		http.Error(w, err.Error(), 500)
