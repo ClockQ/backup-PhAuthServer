@@ -114,11 +114,6 @@ func TestAuthorizeCode(t *testing.T) {
 	}))
 	defer csrv.Close()
 
-	srv.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-		userID = "000000"
-		return
-	})
-
 	e.GET("/authorize").
 		WithQuery("uid", uid).
 		WithQuery("response_type", "code").
@@ -286,12 +281,8 @@ func TestRefreshing(t *testing.T) {
 	}))
 	defer csrv.Close()
 
-	srv.SetUserAuthorizationHandler(func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-		userID = "000000"
-		return
-	})
-
 	e.GET("/authorize").
+		WithQuery("uid", uid).
 		WithQuery("response_type", "code").
 		WithQuery("client_id", clientID).
 		WithQuery("scope", "all").

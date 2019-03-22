@@ -1,7 +1,7 @@
 package PhHandler
 
 import (
-		"net/http"
+	"net/http"
 	"reflect"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/oauth2.v3/server"
@@ -80,13 +80,16 @@ func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, 
 	out := PhModel.Account{}
 	cond := bson.M{"_id": bson.ObjectIdHex(token.GetUserID())}
 	err = h.db.FindOneByCondition(&res, &out, cond)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	data := map[string]interface{}{
 		"expires_in":         int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
 		"refresh_expires_in": token.GetRefreshExpiresIn(),
 		"client_id":          token.GetClientID(),
 		"user_id":            token.GetUserID(),
-		"scope":              token.GetScope(),
+		"auth_scope":         token.GetScope(),
 		"all_scope":          out.Scope,
 	}
 	e := json.NewEncoder(w)

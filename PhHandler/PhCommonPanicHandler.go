@@ -2,8 +2,8 @@ package PhHandler
 
 import (
 	"fmt"
-	"github.com/PharbersDeveloper/PhAuthServer/PhPanic"
 	"net/http"
+	"encoding/json"
 )
 
 type CommonPanicHandle struct {
@@ -15,5 +15,18 @@ func (ctm CommonPanicHandle) NewCommonPanicHandle(args ...interface{}) CommonPan
 
 func (ctm CommonPanicHandle) HandlePanic(rw http.ResponseWriter, r *http.Request, p interface{}) {
 	fmt.Println("CommonHandlePanic接收到", p)
-	PhPanic.ErrInstance().ErrorReval(p.(string), rw)
+
+	status := http.StatusOK
+
+	rw.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	rw.Header().Set("Cache-Control", "no-store")
+	rw.Header().Set("Pragma", "no-cache")
+	rw.WriteHeader(status)
+
+	data := make(map[string]interface{})
+	data["error"] = "invalid_grant"
+	data["error_description"] = p
+	json.NewEncoder(rw).Encode(data)
+
+	//PhPanic.ErrInstance().ErrorReval(p.(string), rw)
 }

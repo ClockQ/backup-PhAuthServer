@@ -36,11 +36,11 @@ func (h PhAuthPageHandler) NewAuthPageHandler(args ...interface{}) PhAuthPageHan
 
 func (h PhAuthPageHandler) Auth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	file, err := os.Open(h.Args[0])
+	defer file.Close()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return 1
 	}
-	defer file.Close()
 	fi, _ := file.Stat()
 	http.ServeContent(w, r, file.Name(), fi.ModTime(), file)
 	return 0
