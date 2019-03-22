@@ -63,7 +63,7 @@ func userAuthorizeHandler(rdb *BmRedis.BmRedis) (handler func(w http.ResponseWri
 		result, err := redisDriver.Exists(userID + "_login").Result()
 		redisDriver.Del(userID)
 		if userID == "" || result == 0 {
-			log.Println("用户未登录活操作超时，转至登录页")
+			log.Println("用户未登录或操作超时，转至登录页")
 			userID = ""
 			toUrl := strings.Replace(r.URL.Path, "Authorize", "Login", -1)
 			returnUri := r.Form.Encode()
