@@ -61,6 +61,37 @@ functions:
   - BmRedisDaemon
   method: Authorize
   http: GET
+- name: PhUserAgentHandler
+  create: NewUserAgentHandle
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: ThirdParty
+  http: GET
+  args:
+  - name
+- name: PhGenerateAccessTokenHandler
+  create: NewAuthorizeHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: GenerateAccessToken
+  http: GET
+- name: PhRefreshAccessTokenHandler
+  create: NewAuthorizeHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: RefreshAccessToken
+  http: GET
+- name: PhPasswordLoginHandler
+  create: NewAuthorizeHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: PasswordLogin
+  http: POST
+
 
 middlewares:
 #- name: NtmCheckTokenMiddleware
@@ -78,13 +109,17 @@ daemons:
 - name: BmMongodbDaemon
   method: NewMongoDBDaemon
   args:
-    host: primary
+#    host: primary
+#    port: 27017
+    host: 127.0.0.1
     port: 27017
     database: pharbers-auth
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
-    host: redis
+#    host: redis
+#    port: 6379
+    host: 127.0.0.1
     port: 6379
     password:
     database: 0

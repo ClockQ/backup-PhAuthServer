@@ -1,15 +1,23 @@
 package PhHandler
 
 import (
-	"net/http"
-	"reflect"
-	"gopkg.in/oauth2.v3/server"
-	"github.com/julienschmidt/httprouter"
+	"context"
+	"encoding/json"
+	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
 	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"github.com/julienschmidt/httprouter"
+	"golang.org/x/oauth2"
+	"gopkg.in/oauth2.v3/server"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"reflect"
+	"time"
 )
+
 
 type PhAuthorizeHandler struct {
 	Method     string
@@ -63,10 +71,194 @@ func (h PhAuthorizeHandler) Authorize(w http.ResponseWriter, r *http.Request, _ 
 	return 0
 }
 
+func (h PhAuthorizeHandler) GenerateAccessToken(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	queryParameter, _ := url.ParseQuery(r.URL.RawQuery)
+
+	config := PhClient.ConfigFromURIParameter(r)
+
+	accessToken, err := config.Exchange(context.Background(), queryParameter["code"][0])
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+
+	// 获取AuthServer 存入的UserID
+	tokenUid, _ := h.RdGetValueByKey(accessToken.AccessToken)
+	initialToken, _ := h.RdGetValueByKey(tokenUid)
+	var oauthPrototype map[string]interface{}
+	json.Unmarshal([]byte(initialToken), &oauthPrototype)
+
+	phToken := PhClient.PhToken{
+		Scope: accessToken.Extra("scope").(string),
+		AccountID: oauthPrototype["UserID"].(string),
+	}
+	phToken.AccessToken = accessToken.AccessToken
+	phToken.RefreshToken = accessToken.RefreshToken
+	phToken.Expiry = accessToken.Expiry
+	phToken.TokenType = accessToken.TokenType
+
+	// 存入Redis RefreshToken
+	err = h.PushValueByKey("RefreshToken_" + phToken.RefreshToken, &phToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	err = e.Encode(phToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+
+	return 0
+}
+
+func (h PhAuthorizeHandler) RefreshAccessToken(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	queryForm, _ := url.ParseQuery(r.URL.RawQuery)
+
+	refreshToken := queryForm["refresh_token"][0]
+	if len(refreshToken) <= 0 {
+		http.Error(w, "refresh_token invalid", http.StatusBadRequest)
+		return 1
+	}
+
+	config := PhClient.ConfigFromURIParameter(r)
+
+
+	token := &oauth2.Token{}
+	tokenResult, err := h.RdGetValueByKey("RefreshToken_" + refreshToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+	json.Unmarshal([]byte(tokenResult), &token)
+
+	token.Expiry = time.Now()
+
+	accessToken, err := config.TokenSource(context.Background(), token).Token()
+
+	tokenUid, _ := h.RdGetValueByKey(accessToken.AccessToken)
+	initialToken, _ := h.RdGetValueByKey(tokenUid)
+
+	var oauthPrototype map[string]interface{}
+	json.Unmarshal([]byte(initialToken), &oauthPrototype)
+
+	phToken := PhClient.PhToken{
+		Scope: accessToken.Extra("scope").(string),
+		AccountID: oauthPrototype["UserID"].(string),
+	}
+	phToken.AccessToken = accessToken.AccessToken
+	phToken.RefreshToken = accessToken.RefreshToken
+	phToken.Expiry = accessToken.Expiry
+	phToken.TokenType = accessToken.TokenType
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+
+	// 存入Redis RefreshToken
+	err = h.PushValueByKey("RefreshToken_" + phToken.RefreshToken, &phToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+
+	defer h.RdDeleteToken("RefreshToken_" + refreshToken)
+
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	e.Encode(phToken)
+	return 0
+}
+
+func (h PhAuthorizeHandler) PasswordLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	body, err := ioutil.ReadAll(r.Body)
+
+	var parameter map[string]interface{}
+	json.Unmarshal(body, &parameter)
+
+	config := PhClient.ConfigFromURIParameter(r)
+	accessToken, err := config.PasswordCredentialsToken(context.Background(), parameter["username"].(string), parameter["password"].(string))
+
+
+	// 获取AuthServer 存入的UserID
+	tokenUid, _ := h.RdGetValueByKey(accessToken.AccessToken)
+	initialToken, _ := h.RdGetValueByKey(tokenUid)
+	var oauthPrototype map[string]interface{}
+	json.Unmarshal([]byte(initialToken), &oauthPrototype)
+
+	phToken := PhClient.PhToken{
+		Scope: accessToken.Extra("scope").(string),
+		AccountID: oauthPrototype["UserID"].(string),
+	}
+	phToken.AccessToken = accessToken.AccessToken
+	phToken.RefreshToken = accessToken.RefreshToken
+	phToken.Expiry = accessToken.Expiry
+	phToken.TokenType = accessToken.TokenType
+
+	// 存入Redis RefreshToken
+	err = h.PushValueByKey("RefreshToken_" + phToken.RefreshToken, &phToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	err = e.Encode(phToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 1
+	}
+	return 0
+}
+
 func (h PhAuthorizeHandler) GetHttpMethod() string {
 	return h.HttpMethod
 }
 
 func (h PhAuthorizeHandler) GetHandlerMethod() string {
 	return h.Method
+}
+
+func (h PhAuthorizeHandler) PushValueByKey(key string, value interface{}) error {
+	jsonToken, _ := json.Marshal(value)
+
+	client := h.rd.GetRedisClient()
+	defer client.Close()
+
+	pipe := client.Pipeline()
+	pipe.Set(key, string(jsonToken), -1)
+
+	//pipe.Append(key, string(jsonToken))
+
+	_, err := pipe.Exec()
+	return err
+}
+
+func (h PhAuthorizeHandler) RdGetValueByKey(key string) (string, error){
+	client := h.rd.GetRedisClient()
+	defer client.Close()
+
+	result, err := client.Get(key).Result()
+
+	if err != nil {
+		return "" ,err
+	}
+	return result, nil
+}
+
+func (h PhAuthorizeHandler) RdDeleteToken(key string) {
+	client := h.rd.GetRedisClient()
+	defer client.Close()
+
+	pipe := client.Pipeline()
+
+	pipe.Del(key)
+
+	pipe.Exec()
 }

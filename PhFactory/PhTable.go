@@ -32,6 +32,10 @@ var PhFunctionFactory = map[string]interface{}{
 	"PhTokenHandler":           PhHandler.PhTokenHandler{},
 	"PhTokenValidationHandler": PhHandler.PhTokenHandler{},
 	"PhAuthorizeHandler":       PhHandler.PhAuthorizeHandler{},
+	"PhUserAgentHandler":       PhHandler.PhUserAgentHandler{},
+	"PhGenerateAccessTokenHandler": PhHandler.PhAuthorizeHandler{},
+	"PhRefreshAccessTokenHandler": PhHandler.PhAuthorizeHandler{},
+	"PhPasswordLoginHandler": PhHandler.PhAuthorizeHandler{},
 }
 var PhMiddlewareFactory = map[string]interface{}{
 	//"NtmCheckTokenMiddleware": NtmMiddleware.NtmCheckTokenMiddleware{},

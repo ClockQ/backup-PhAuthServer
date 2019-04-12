@@ -1,16 +1,17 @@
 package PhServer
 
 import (
+	"fmt"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/oauth2.v3"
+	"gopkg.in/oauth2.v3/manage"
+	"gopkg.in/oauth2.v3/server"
 	"log"
 	"net/http"
 	"strings"
-	"gopkg.in/oauth2.v3"
-	"gopkg.in/mgo.v2/bson"
-	"gopkg.in/oauth2.v3/manage"
-	"gopkg.in/oauth2.v3/server"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 )
 
 var authServer *server.Server
@@ -33,6 +34,7 @@ func NewAuthorizeCodeServer(manager oauth2.Manager, mdb *BmMongodb.BmMongodb, rd
 	srv.SetClientScopeHandler(clientScopeHandler(srv))
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler(rdb))
 	srv.SetPasswordAuthorizationHandler(passwordAuthorizationHandler(mdb))
+	srv.SetAuthorizeScopeHandler(authorizeScopeHandler(mdb))
 	return
 }
 
@@ -88,6 +90,33 @@ func passwordAuthorizationHandler(mdb *BmMongodb.BmMongodb) (handler func(userna
 			log.Println("用户使用密码验证，但登录失败")
 		}
 
+		return
+	}
+	return
+}
+
+func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.ResponseWriter, r *http.Request) (scope string, err error)) {
+	handler = func(w http.ResponseWriter, r *http.Request) (scope string, err error) {
+		accRes := PhModel.Account{}
+		accOut := PhModel.Account{}
+		userID := r.FormValue("uid")
+		applyScopes := strings.Split(r.FormValue("scope"), " ")
+		cond := bson.M{"_id": bson.ObjectIdHex(userID)}
+		_ = mdb.FindOneByCondition(&accRes, &accOut, cond)
+
+		var s string
+		for _, applyScope := range applyScopes {
+			smallScope := strings.Split(applyScope, "/")
+			level := smallScope[0] // Pharbers 官网 APP 单个系统
+			action := smallScope[1] // 申请的动作表述
+			for _, v := range strings.Split(accOut.Scope, "|") {
+				if strings.Contains(v, action) {
+					s += fmt.Sprint(level, "/", v, "|")
+				}
+			}
+		}
+
+		scope = s
 		return
 	}
 	return

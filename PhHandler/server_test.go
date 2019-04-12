@@ -1,24 +1,24 @@
 package PhHandler
 
 import (
-	"net/url"
-	"testing"
-	"net/http"
-	"net/http/httptest"
-	"gopkg.in/oauth2.v3"
-	"gopkg.in/oauth2.v3/server"
-	"github.com/gavv/httpexpect"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/yaml"
 	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/yaml"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"github.com/gavv/httpexpect"
+	"gopkg.in/oauth2.v3"
+	"gopkg.in/oauth2.v3/server"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"testing"
 )
 
 var (
 	srv          *server.Server
 	tsrv         *httptest.Server
 	csrv         *httptest.Server
-	clientID     = "5c90db71eeefcc082c0823b2"
+	clientID     = "5caaf48dd4bc51126652b4c2"
 	clientSecret = "5c90db71eeefcc082c0823b2"
 	uid          = "5c4552455ee2dd7c36a94a9e"
 )
@@ -101,28 +101,104 @@ func testClient(t *testing.T, w http.ResponseWriter, r *http.Request, e *httpexp
 	}
 }
 
-func TestAuthorizeCode(t *testing.T) {
-	tsrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		testServer(t, w, r)
-	}))
-	defer tsrv.Close()
+func TestRedirectEndPoint(t *testing.T) {
 
-	e := httpexpect.New(t, tsrv.URL)
+	e := httpexpect.New(t, "http://127.0.0.1:9096/v0")
 
-	csrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		testClient(t, w, r, e)
-	}))
-	defer csrv.Close()
+	e.GET("/ThirdParty").
+			WithQuery("client_id", clientID).
+			WithQuery("client_secret", clientSecret).
+			WithQuery("scope", "ALL").
+			WithQuery("state", "xyz").
+			WithQuery("redirect_uri", "http://192.168.100.116:4433/oauth-callback").
+			Expect().Status(http.StatusOK)
 
-	e.GET("/authorize").
-		WithQuery("uid", uid).
-		WithQuery("response_type", "code").
-		WithQuery("client_id", clientID).
-		WithQuery("scope", "all").
-		WithQuery("state", "123").
-		WithQuery("redirect_uri", url.QueryEscape(csrv.URL+"/oauth2")).
-		Expect().Status(http.StatusOK)
+	//outPut := map[string]string{}
+	//body,err := ioutil.ReadAll(response.Body())
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//err = json.Unmarshal(body, &outPut)
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//fmt.Println(outPut)
+
+	//client := &http.Client{}
+	//url := fmt.Sprint("http://192.168.100.116:9096/v0/ThirdParty?",
+	//						"client_id=5caaf48dd4bc51126652b4c2&",
+	//						"client_secret=5c90db71eeefcc082c0823b2&",
+	//						"redirect_uri=http://192.168.100.116:4433/oauth-callback")
+	//
+	//req, err := http.NewRequest("GET", url, nil)
+	//
+	//response, err := client.Do(req)
+	//
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//outPut := map[string]string{}
+	//body,err := ioutil.ReadAll(response.Body)
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//err = json.Unmarshal(body, &outPut)
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//fmt.Println(outPut)
 }
+
+//func TestTokenEndPoint(t *testing.T) {
+//	client := &http.Client{}
+//	url := fmt.Sprint("http://192.168.100.116:9096/v0/GenerateAccessToken?",
+//		"client_id=5caaf48dd4bc51126652b4c2&",
+//		"client_secret=5c90db71eeefcc082c0823b2&",
+//		"redirect_uri=http://192.168.100.116:4433/oauth-callback&",
+//		"code=50306MWPPVQOOJTONYUNEA")
+//
+//	req, err := http.NewRequest("GET", url, nil)
+//
+//
+//	response, err := client.Do(req)
+//
+//	if err != nil {
+//		t.Error(err)
+//	}
+//	outPut := map[string]string{}
+//	body,err := ioutil.ReadAll(response.Body)
+//	if err != nil {
+//		t.Error(err)
+//	}
+//	err = json.Unmarshal(body, &outPut)
+//	if err != nil {
+//		t.Error(err)
+//	}
+//	fmt.Println(outPut)
+//}
+
+//func TestAuthorizeCode(t *testing.T) {
+//	tsrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		testServer(t, w, r)
+//	}))
+//	defer tsrv.Close()
+//
+//	e := httpexpect.New(t, tsrv.URL)
+//
+//	csrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		testClient(t, w, r, e)
+//	}))
+//	defer csrv.Close()
+//
+//	e.GET("/authorize").
+//		WithQuery("uid", uid).
+//		WithQuery("response_type", "code").
+//		WithQuery("client_id", clientID).
+//		WithQuery("scope", "all").
+//		WithQuery("state", "123").
+//		WithQuery("redirect_uri", url.QueryEscape(csrv.URL+"/oauth2")).
+//		Expect().Status(http.StatusOK)
+//}
 
 //
 //func TestImplicit(t *testing.T) {

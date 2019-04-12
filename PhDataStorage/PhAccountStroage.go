@@ -13,7 +13,6 @@ import (
 // PhAccountStorage stores all of the tasty modelleaf, needs to be injected into
 // Account and Account Resource. In the real world, you would use a database for that.
 type PhAccountStorage struct {
-	images  map[string]*PhModel.Account
 	idCount int
 
 	db *BmMongodb.BmMongodb
@@ -21,7 +20,7 @@ type PhAccountStorage struct {
 
 func (s PhAccountStorage) NewAccountStorage(args []BmDaemons.BmDaemon) *PhAccountStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &PhAccountStorage{make(map[string]*PhModel.Account), 1, mdb}
+	return &PhAccountStorage{1, mdb}
 }
 
 // GetAll of the modelleaf

@@ -1,18 +1,16 @@
 package PhHandler
 
 import (
-	"net/http"
-	"reflect"
-	"strings"
-	"gopkg.in/mgo.v2/bson"
-	"github.com/julienschmidt/httprouter"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
+	"github.com/julienschmidt/httprouter"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
+	"reflect"
+	"strings"
 	"time"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
-	"fmt"
 )
 
 type PhAccountHandler struct {
@@ -76,26 +74,27 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Validation Scope
-	scope := r.FormValue("scope")
-	bl := false
-	if array.IsExistItem("ALL", strings.Split(out.Scope, "#")) {
-		bl = true
-	} else {
-		for _, v := range strings.Split(scope, "#") {
-			if array.IsExistItem(v, strings.Split(out.Scope, "#")) {
-				bl = true
-				break
-			}
-		}
-	}
-
-	if bl == false {
-		panic(fmt.Sprintf("登录失败, 传入 'scope = %s' 错误，或用户没有 '%s' 的权限", scope, scope))
-	}
+	// 没啥用
+	//scope := r.FormValue("scope")
+	//bl := false
+	//if array.IsExistItem("ALL", strings.Split(out.Scope, "|")) {
+	//	bl = true
+	//} else {
+	//	for _, v := range strings.Split(scope, "|") {
+	//		if array.IsExistItem(v, strings.Split(out.Scope, "|")) {
+	//			bl = true
+	//			break
+	//		}
+	//	}
+	//}
+	//
+	//if bl == false {
+	//	panic(fmt.Sprintf("登录失败, 传入 'scope = %s' 错误，或用户没有 '%s' 的权限", scope, scope))
+	//}
 
 	redisDriver := h.rd.GetRedisClient()
 	defer redisDriver.Close()
-	exp := time.Second * 5
+	exp := time.Second * 60
 	_, err = redisDriver.Set(out.ID+"_login", true, exp).Result()
 	if err != nil {
 		panic(err.Error())
