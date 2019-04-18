@@ -1,6 +1,7 @@
 package PhServer
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
@@ -100,24 +101,83 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 		accRes := PhModel.Account{}
 		accOut := PhModel.Account{}
 		userID := r.FormValue("uid")
-		applyScopes := strings.Split(r.FormValue("scope"), " ")
+		applyScopes := strings.Split(r.FormValue("scope"), " ") // 申请Scope
 		cond := bson.M{"_id": bson.ObjectIdHex(userID)}
 		_ = mdb.FindOneByCondition(&accRes, &accOut, cond)
 
-		var s string
 		for _, applyScope := range applyScopes {
-			smallScope := strings.Split(applyScope, "/")
-			level := smallScope[0] // Pharbers 官网 APP 单个系统
-			action := smallScope[1] // 申请的动作表述
-			for _, v := range strings.Split(accOut.Scope, "|") {
-				if strings.Contains(v, action) {
-					s += fmt.Sprint(level, "/", v, "|")
+			detailScope := strings.Split(applyScope, "/")
+			level := detailScope[0] // Pharbers 官网 App 单个系统
+			action := detailScope[1] // 申请的动作表述
+			accScopes := strings.Split(accOut.Scope, "|")
+
+			prefix, scopes := scopeSplit(action)
+
+			if len(scopes) > 0 {
+				truth, result := singleAppGetScope(accScopes, scopes, prefix, level)
+				if truth { // App登入时输入的Scope超出设置权限，直接跳转到Password登录模式的页面重新验证
+					w.Header().Set("Location", "http://www.baidu.com") // TODO：暂定跳转百度
+					w.WriteHeader(http.StatusFound)
+				} else {
+					scope += result
 				}
+			} else {
+				scope += topLevelGetScope(accScopes, action, level)
 			}
 		}
-
-		scope = s
 		return
 	}
 	return
+}
+
+func topLevelGetScope(accScope []string, applyScope, level string) string {
+		var scope string
+		for _, v := range accScope {
+			if strings.Contains(v, applyScope) {
+				scope += fmt.Sprint(level, "/", v, "|")
+			}
+		}
+		return scope
+}
+
+func singleAppGetScope(accScope, scopes []string,  prefix, level string) (bool, string) {
+	var (
+		scope string
+		temp map[string][]string
+	)
+	temp = make(map[string][]string)
+	for _, applyScope := range scopes {
+		for _, v := range accScope {
+			if prefix == strings.Split(v, ":")[0] {
+				if strings.Contains(v, applyScope) {
+					key := strings.Split(v, ":")[0]
+					temp[key]= append(temp[key], applyScope)
+				} else {
+					return true, ""
+				}
+			}
+		}
+	}
+	body, _ := json.Marshal(temp)
+	scope = strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}")
+	if scope != "" {
+		return false, scope + "|"
+	}
+	return true, ""
+
+}
+
+func scopeSplit(scope string) (string, []string) {
+	var (
+		detailScope []string
+		scopeSubStr string
+	)
+	detailScope = strings.Split(scope, ":")
+	prefix := detailScope[0]
+	if len(detailScope) == 2 {
+		scopeSubStr = strings.Trim(detailScope[1], "[]")
+		return prefix, strings.Split(scopeSubStr, ",")
+	}
+
+	return prefix, nil
 }
