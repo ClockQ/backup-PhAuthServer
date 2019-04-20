@@ -9,6 +9,7 @@ type Client struct {
 	Id_ 	bson.ObjectId `json:"-" bson:"_id"`
 	Secret	string	`json:"secret" bson:"secret"`
 	Domain	string	`json:"domain" bson:"domain"`
+	AccountID string	`json:"account-id" bson:"account-id"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

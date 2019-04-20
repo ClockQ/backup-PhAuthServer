@@ -10,20 +10,19 @@ import (
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 )
 
-// PhAccountStorage stores all of the tasty modelleaf, needs to be injected into
+// PhImageStroage stores all of the tasty modelleaf, needs to be injected into
 // Account and Account Resource. In the real world, you would use a database for that.
-type PhAccountStorage struct {
-
+type PhImageStroage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s PhAccountStorage) NewAccountStorage(args []BmDaemons.BmDaemon) *PhAccountStorage {
+func (s PhImageStroage) NewAccountStorage(args []BmDaemons.BmDaemon) *PhImageStroage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &PhAccountStorage{db: mdb}
+	return &PhImageStroage{db: mdb}
 }
 
 // GetAll of the modelleaf
-func (s PhAccountStorage) GetAll(r api2go.Request, skip int, take int) []PhModel.Account {
+func (s PhImageStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.Account {
 	in := PhModel.Account{}
 	var out []PhModel.Account
 	err := s.db.FindMulti(r, &in, &out, skip, take)
@@ -39,7 +38,7 @@ func (s PhAccountStorage) GetAll(r api2go.Request, skip int, take int) []PhModel
 }
 
 // GetOne tasty modelleaf
-func (s PhAccountStorage) GetOne(id string) (PhModel.Account, error) {
+func (s PhImageStroage) GetOne(id string) (PhModel.Account, error) {
 	in := PhModel.Account{ID: id}
 	out := PhModel.Account{ID: id}
 	err := s.db.FindOne(&in, &out)
@@ -51,7 +50,7 @@ func (s PhAccountStorage) GetOne(id string) (PhModel.Account, error) {
 }
 
 // Insert a fresh one
-func (s *PhAccountStorage) Insert(c PhModel.Account) string {
+func (s *PhImageStroage) Insert(c PhModel.Account) string {
 	tmp, err := s.db.InsertBmObject(&c)
 	if err != nil {
 		fmt.Println(err)
@@ -61,7 +60,7 @@ func (s *PhAccountStorage) Insert(c PhModel.Account) string {
 }
 
 // Delete one :(
-func (s *PhAccountStorage) Delete(id string) error {
+func (s *PhImageStroage) Delete(id string) error {
 	in := PhModel.Account{ID: id}
 	err := s.db.Delete(&in)
 	if err != nil {
@@ -72,7 +71,7 @@ func (s *PhAccountStorage) Delete(id string) error {
 }
 
 // Update updates an existing modelleaf
-func (s *PhAccountStorage) Update(c PhModel.Account) error {
+func (s *PhImageStroage) Update(c PhModel.Account) error {
 	err := s.db.Update(&c)
 	if err != nil {
 		return fmt.Errorf("Account with id does not exist")

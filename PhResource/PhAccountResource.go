@@ -13,6 +13,7 @@ import (
 
 type PhAccountResource struct {
 	PhAccountStorage *PhDataStorage.PhAccountStorage
+
 }
 
 func (c PhAccountResource) NewAccountResource(args []BmDataStorage.BmStorage) *PhAccountResource {

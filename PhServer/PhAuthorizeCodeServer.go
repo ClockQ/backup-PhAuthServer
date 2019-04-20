@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"gopkg.in/mgo.v2/bson"
@@ -98,23 +99,37 @@ func passwordAuthorizationHandler(mdb *BmMongodb.BmMongodb) (handler func(userna
 
 func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.ResponseWriter, r *http.Request) (scope string, err error)) {
 	handler = func(w http.ResponseWriter, r *http.Request) (scope string, err error) {
+		var scopes []*PhModel.Scope
 		accRes := PhModel.Account{}
 		accOut := PhModel.Account{}
 		userID := r.FormValue("uid")
 		applyScopes := strings.Split(r.FormValue("scope"), " ") // 申请Scope
 		cond := bson.M{"_id": bson.ObjectIdHex(userID)}
-		_ = mdb.FindOneByCondition(&accRes, &accOut, cond)
+		err = mdb.FindOneByCondition(&accRes, &accOut, cond)
+
+		if err != nil {
+			w.Header().Set("Location", "http://www.baidu.com") // TODO：暂定跳转百度
+			w.WriteHeader(http.StatusFound)
+			return
+		}
+
+		// TODO 人多后有效率问题
+		for _, sid := range accOut.ScopeIDs {
+			cond = bson.M{"_id": bson.ObjectIdHex(sid)}
+			scopeRes := PhModel.Scope{}
+			scopeOut := PhModel.Scope{}
+			_ = mdb.FindOneByCondition(&scopeRes, &scopeOut, cond)
+			scopes = append(scopes, &scopeOut)
+		}
 
 		for _, applyScope := range applyScopes {
 			detailScope := strings.Split(applyScope, "/")
 			level := detailScope[0] // Pharbers 官网 App 单个系统
 			action := detailScope[1] // 申请的动作表述
-			accScopes := strings.Split(accOut.Scope, "|")
 
-			prefix, scopes := scopeSplit(action)
-
-			if len(scopes) > 0 {
-				truth, result := singleAppGetScope(accScopes, scopes, prefix, level)
+			prefix, applyScopes := scopeSplit(action)
+			if len(applyScopes) > 0 {
+				truth, result := singleAppGetScope(scopes, applyScopes, prefix, level)
 				if truth { // App登入时输入的Scope超出设置权限，直接跳转到Password登录模式的页面重新验证
 					w.Header().Set("Location", "http://www.baidu.com") // TODO：暂定跳转百度
 					w.WriteHeader(http.StatusFound)
@@ -122,44 +137,52 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 					scope += result
 				}
 			} else {
-				scope += topLevelGetScope(accScopes, action, level)
+				scope += topLevelGetScope(scopes, level, prefix)
 			}
 		}
+		scope = scope[:strings.LastIndex(scope, "|")]
 		return
 	}
 	return
 }
 
-func topLevelGetScope(accScope []string, applyScope, level string) string {
-		var scope string
-		for _, v := range accScope {
-			if strings.Contains(v, applyScope) {
-				scope += fmt.Sprint(level, "/", v, "|")
+func topLevelGetScope(accScope []*PhModel.Scope, level,prefix string) string {
+		var (
+			scope string
+			scopeTemp map[string][]string
+		)
+	scopeTemp = make(map[string][]string)
+
+		for _, s := range accScope {
+			if s.Level == prefix {
+				scopeTemp[prefix]= append(scopeTemp[prefix], s.Value)
 			}
 		}
+
+		body, _ := json.Marshal(scopeTemp)
+		scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"), "|")
 		return scope
 }
 
-func singleAppGetScope(accScope, scopes []string,  prefix, level string) (bool, string) {
+func singleAppGetScope(accScope []*PhModel.Scope,  applyScopes []string,  prefix, level string) (bool, string) {
 	var (
 		scope string
-		temp map[string][]string
+		scopeTemp map[string][]string
+		temp []string
 	)
-	temp = make(map[string][]string)
-	for _, applyScope := range scopes {
-		for _, v := range accScope {
-			if prefix == strings.Split(v, ":")[0] {
-				if strings.Contains(v, applyScope) {
-					key := strings.Split(v, ":")[0]
-					temp[key]= append(temp[key], applyScope)
-				} else {
-					return true, ""
-				}
-			}
+	scopeTemp = make(map[string][]string)
+	for _, v := range accScope {
+		temp = append(temp, v.Level + ":" + v.Value)
+	}
+	for _, applyScope := range applyScopes {
+		if array.IsExistItem(prefix + ":" + applyScope, temp) {
+			scopeTemp[prefix]= append(scopeTemp[prefix], applyScope)
+		} else {
+			return true, ""
 		}
 	}
-	body, _ := json.Marshal(temp)
-	scope = strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}")
+	body, _ := json.Marshal(scopeTemp)
+	scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"))
 	if scope != "" {
 		return false, scope + "|"
 	}

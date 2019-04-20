@@ -110,7 +110,7 @@ func TestRedirectEndPoint(t *testing.T) {
 			WithQuery("client_secret", clientSecret).
 			WithQuery("scope", "ALL").
 			WithQuery("state", "xyz").
-			WithQuery("redirect_uri", "http://192.168.100.116:4433/oauth-callback").
+			WithQuery("redirect_uri", "http://192.168.0.104:4433/oauth-callback").
 			Expect().Status(http.StatusOK)
 
 	//outPut := map[string]string{}
@@ -125,10 +125,10 @@ func TestRedirectEndPoint(t *testing.T) {
 	//fmt.Println(outPut)
 
 	//client := &http.Client{}
-	//url := fmt.Sprint("http://192.168.100.116:9096/v0/ThirdParty?",
+	//url := fmt.Sprint("http://192.168.0.104:9096/v0/ThirdParty?",
 	//						"client_id=5caaf48dd4bc51126652b4c2&",
 	//						"client_secret=5c90db71eeefcc082c0823b2&",
-	//						"redirect_uri=http://192.168.100.116:4433/oauth-callback")
+	//						"redirect_uri=http://192.168.0.104:4433/oauth-callback")
 	//
 	//req, err := http.NewRequest("GET", url, nil)
 	//
@@ -151,10 +151,10 @@ func TestRedirectEndPoint(t *testing.T) {
 
 //func TestTokenEndPoint(t *testing.T) {
 //	client := &http.Client{}
-//	url := fmt.Sprint("http://192.168.100.116:9096/v0/GenerateAccessToken?",
+//	url := fmt.Sprint("http://192.168.0.104:9096/v0/GenerateAccessToken?",
 //		"client_id=5caaf48dd4bc51126652b4c2&",
 //		"client_secret=5c90db71eeefcc082c0823b2&",
-//		"redirect_uri=http://192.168.100.116:4433/oauth-callback&",
+//		"redirect_uri=http://192.168.0.104:4433/oauth-callback&",
 //		"code=50306MWPPVQOOJTONYUNEA")
 //
 //	req, err := http.NewRequest("GET", url, nil)
