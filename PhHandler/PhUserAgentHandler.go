@@ -56,7 +56,7 @@ func (h PhUserAgentHandler) NewUserAgentHandle(args ...interface{}) PhUserAgentH
 
 func (h PhUserAgentHandler) ThirdParty(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 
-	config := PhClient.ConfigFromURIParameter(r)
+	config := PhClient.EndPoint.ConfigFromURIParameter(r)
 	url := config.AuthCodeURL("xyz")
 	response := map[string]interface{} {
 		"redirect-uri": url,

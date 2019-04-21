@@ -74,7 +74,7 @@ func (h PhAuthorizeHandler) Authorize(w http.ResponseWriter, r *http.Request, _ 
 func (h PhAuthorizeHandler) GenerateAccessToken(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	queryParameter, _ := url.ParseQuery(r.URL.RawQuery)
 
-	config := PhClient.ConfigFromURIParameter(r)
+	config := PhClient.EndPoint.ConfigFromURIParameter(r)
 
 	accessToken, err := config.Exchange(context.Background(), queryParameter["code"][0])
 
@@ -125,7 +125,7 @@ func (h PhAuthorizeHandler) RefreshAccessToken(w http.ResponseWriter, r *http.Re
 		return 1
 	}
 
-	config := PhClient.ConfigFromURIParameter(r)
+	config := PhClient.EndPoint.ConfigFromURIParameter(r)
 
 
 	token := &oauth2.Token{}
@@ -181,7 +181,7 @@ func (h PhAuthorizeHandler) PasswordLogin(w http.ResponseWriter, r *http.Request
 	var parameter map[string]interface{}
 	json.Unmarshal(body, &parameter)
 
-	config := PhClient.ConfigFromURIParameter(r)
+	config := PhClient.EndPoint.ConfigFromURIParameter(r)
 	accessToken, err := config.PasswordCredentialsToken(context.Background(), parameter["username"].(string), parameter["password"].(string))
 
 
