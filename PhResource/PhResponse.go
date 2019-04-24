@@ -13,7 +13,7 @@ type Response struct {
 func (r Response) Metadata() map[string]interface{} {
 	var meta = map[string]interface{}{
 		"author":      "Pharbers Inc. AlfredYang",
-		"license":     "pharbers.ntm",
+		"license":     "pharbers.oauth",
 		"license-url": "http://www.pharbers.com",
 	}
 

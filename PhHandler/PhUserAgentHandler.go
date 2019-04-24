@@ -1,14 +1,17 @@
 package PhHandler
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/julienschmidt/httprouter"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"reflect"
+	"strings"
 )
 
 type PhUserAgentHandler struct {
@@ -55,16 +58,38 @@ func (h PhUserAgentHandler) NewUserAgentHandle(args ...interface{}) PhUserAgentH
 }
 
 func (h PhUserAgentHandler) ThirdParty(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	queryForm, _ := url.ParseQuery(r.URL.RawQuery)
 
 	config := PhClient.EndPoint.ConfigFromURIParameter(r)
-	url := config.AuthCodeURL("xyz")
-	response := map[string]interface{} {
-		"redirect-uri": url,
+	redirectUrl := config.AuthCodeURL("xyz")
+	if v := queryForm["status"]; len(v) > 0 && v[0] == "self"{
+		redirectUrl += "&status=" + v[0]
+
+		// 转发
+		client := &http.Client{}
+		req, _ := http.NewRequest("GET", redirectUrl, nil)
+		for k, v := range r.Header {
+			req.Header.Add(k, v[0])
+		}
+		response, err := client.Do(req)
+		if err != nil {
+			fmt.Println("Login Error")
+		}
+		data, err := ioutil.ReadAll(response.Body)
+
+		str := string(data)
+		preStr := str[:strings.LastIndex(str, "</body>")]
+		sufStr := str[strings.LastIndex(str, "</body>"):]
+		truncationUrl := redirectUrl[strings.LastIndex(redirectUrl, "?"):]
+		insertContent := fmt.Sprint("<input type='hidden' id='parameter'", "value='", truncationUrl, "'", "/>")
+
+		content := []byte(fmt.Sprint(preStr, insertContent, sufStr))
+
+		w.Write(content)
+
+		return 0
 	}
-	// 这个地方再想想
-	enc := json.NewEncoder(w)
-	enc.Encode(response)
-	//http.Redirect(w, r, url, http.StatusFound)
+	http.Redirect(w, r, redirectUrl, http.StatusFound)
 	return 0
 }
 

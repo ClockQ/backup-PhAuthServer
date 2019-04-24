@@ -25,7 +25,7 @@ ENV     PH_AUTH_HOME $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer/resou
 RUN go install -v github.com/PharbersDeveloper/PhAuthServer
 
 # 暴露端口
-EXPOSE 31415
+EXPOSE 9096
 
 # 设置工作目录
 WORKDIR $GOPATH/bin

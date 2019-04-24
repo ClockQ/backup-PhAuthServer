@@ -1,4 +1,4 @@
 {
-  "Auth": "http://192.168.100.116:9096/v0/Authorize",
-  "Token": "http://192.168.100.116:9096/v0/Token"
+  "Auth": "http://oauth.pharbers.com/v0/Authorize",
+  "Token": "http://oauth.pharbers.com/v0/Token"
 }

@@ -62,10 +62,10 @@ func (p *PhAuthorizeCodeClientStore) DelInfo(cli oauth2.ClientInfo) (err error) 
 
 func clientInfo2Model(cli oauth2.ClientInfo) (bmb BmModel.BmModelBase) {
 	bmb = &PhModel.Client{
-		ID:     cli.GetID(),
-		Secret: cli.GetSecret(),
-		Domain: cli.GetDomain(),
-		AccountID: cli.GetUserID(),
+		ClientID:  	cli.GetID(),
+		Secret: 	cli.GetSecret(),
+		Domain: 	cli.GetDomain(),
+		AccountID: 	cli.GetUserID(),
 	}
 	return
 }
@@ -73,7 +73,7 @@ func clientInfo2Model(cli oauth2.ClientInfo) (bmb BmModel.BmModelBase) {
 func Model2ClientInfo(bmb BmModel.BmModelBase) (cli oauth2.ClientInfo) {
 	model := bmb.(*PhModel.Client)
 	cli = &models.Client{
-		ID:     model.ID,
+		ID:     model.ClientID,
 		Secret: model.Secret,
 		Domain: model.Domain,
 		UserID: model.AccountID,

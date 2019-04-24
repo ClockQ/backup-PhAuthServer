@@ -184,7 +184,6 @@ func (h PhAuthorizeHandler) PasswordLogin(w http.ResponseWriter, r *http.Request
 	config := PhClient.EndPoint.ConfigFromURIParameter(r)
 	accessToken, err := config.PasswordCredentialsToken(context.Background(), parameter["username"].(string), parameter["password"].(string))
 
-
 	// 获取AuthServer 存入的UserID
 	tokenUid, _ := h.RdGetValueByKey(accessToken.AccessToken)
 	initialToken, _ := h.RdGetValueByKey(tokenUid)

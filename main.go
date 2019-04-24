@@ -5,6 +5,7 @@ import (
 	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
 	"github.com/julienschmidt/httprouter"
 	"github.com/manyminds/api2go"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
@@ -45,9 +46,16 @@ func main() {
 	pod.RegisterAllFunctions(version, api)
 	pod.RegisterAllMiddleware(api)
 
+
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST"},
+	})
+
 	handler := api.Handler().(*httprouter.Router)
+
 	pod.RegisterPanicHandler(handler)
-	http.ListenAndServe(":"+phRouter.Port, handler)
+	http.ListenAndServe(":"+phRouter.Port, c.Handler(handler))
 
 
 

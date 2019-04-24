@@ -62,6 +62,7 @@ func clientScopeHandler(srv *server.Server) (handler func(clientID, scope string
 
 func userAuthorizeHandler(rdb *BmRedis.BmRedis) (handler func(w http.ResponseWriter, r *http.Request) (userID string, err error)) {
 	handler = func(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+		//queryForm, _ := url.ParseQuery(r.URL.RawQuery)
 		userID = r.FormValue("uid")
 		redisDriver := rdb.GetRedisClient()
 		result, err := redisDriver.Exists(userID + "_login").Result()

@@ -7,9 +7,11 @@ import (
 type Client struct {
 	ID  	string        `json:"-"`
 	Id_ 	bson.ObjectId `json:"-" bson:"_id"`
+	ClientID string	`json:"client-id" bson:"client-id"`
 	Secret	string	`json:"secret" bson:"secret"`
 	Domain	string	`json:"domain" bson:"domain"`
-	AccountID string	`json:"account-id" bson:"account-id"`
+	AccountID string	`json:"account-ids" bson:"account-ids"`
+	Describe string 	`json:"describe" bson:"describe"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
