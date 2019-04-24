@@ -1,11 +1,15 @@
 package PhHandler
 
 import (
+	"fmt"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
+	"gopkg.in/oauth2.v3/errors"
 	"net/http"
 	"reflect"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/oauth2.v3/server"
 	"gopkg.in/mgo.v2/bson"
+	"strings"
 
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
@@ -78,10 +82,36 @@ func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, 
 
 	res := PhModel.Account{}
 	out := PhModel.Account{}
+	var scopes []*PhModel.Scope
 	cond := bson.M{"_id": bson.ObjectIdHex(token.GetUserID())}
 	err = h.db.FindOneByCondition(&res, &out, cond)
 	if err != nil {
 		panic(err.Error())
+	}
+
+	// TODO 人多后有效率问题
+	for _, sid := range out.ScopeIDs {
+		cond = bson.M{"_id": bson.ObjectIdHex(sid)}
+		scopeRes := PhModel.Scope{}
+		scopeOut := PhModel.Scope{}
+		_ = h.db.FindOneByCondition(&scopeRes, &scopeOut, cond)
+		scopes = append(scopes, &scopeOut)
+	}
+
+	applyScopes := strings.Split(token.GetScope(), "|") // 申请Scope
+
+	for _, applyScope := range applyScopes {
+		detailScope := strings.Split(applyScope, "/")
+		level := detailScope[0] // Pharbers 官网 App 单个系统
+		action := detailScope[1] // 申请的动作表述
+
+		prefix, applyScopes := scopeSplit(action)
+		if len(applyScopes) > 0 {
+			truth, _ := singleAppGetScope(scopes, applyScopes, prefix, level)
+			if truth { // 输入的Scope超出设置权限，直接跳转到Password登录模式的页面重新验证
+				panic(errors.ErrInvalidScope.Error())
+			}
+		}
 	}
 
 	data := map[string]interface{}{
@@ -90,7 +120,6 @@ func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, 
 		"client_id":          token.GetClientID(),
 		"user_id":            token.GetUserID(),
 		"auth_scope":         token.GetScope(),
-		"all_scope":          out.Scope,
 	}
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
@@ -104,4 +133,45 @@ func (h PhTokenHandler) GetHttpMethod() string {
 
 func (h PhTokenHandler) GetHandlerMethod() string {
 	return h.Method
+}
+
+func singleAppGetScope(accScope []*PhModel.Scope,  applyScopes []string,  prefix, level string) (bool, string) {
+	var (
+		scope string
+		scopeTemp map[string][]string
+		temp []string
+	)
+	scopeTemp = make(map[string][]string)
+	for _, v := range accScope {
+		temp = append(temp, v.Level + ":" + v.Value)
+	}
+	for _, applyScope := range applyScopes {
+		if array.IsExistItem(prefix + ":" + applyScope, temp) {
+			scopeTemp[prefix]= append(scopeTemp[prefix], applyScope)
+		} else {
+			return true, ""
+		}
+	}
+	body, _ := json.Marshal(scopeTemp)
+	scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"))
+	if scope != "" {
+		return false, scope + "|"
+	}
+	return true, ""
+
+}
+
+func scopeSplit(scope string) (string, []string) {
+	var (
+		detailScope []string
+		scopeSubStr string
+	)
+	detailScope = strings.Split(scope, ":")
+	prefix := detailScope[0]
+	if len(detailScope) == 2 {
+		scopeSubStr = strings.Trim(detailScope[1], "[]")
+		return prefix, strings.Split(scopeSubStr, ",")
+	}
+
+	return prefix, nil
 }

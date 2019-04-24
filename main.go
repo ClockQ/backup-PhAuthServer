@@ -1,15 +1,18 @@
 package main
 
 import (
-	"os"
+	"fmt"
+	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
+	"github.com/julienschmidt/httprouter"
+	"github.com/manyminds/api2go"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
-	"github.com/manyminds/api2go"
-	"github.com/julienschmidt/httprouter"
+	"os"
 
+	"github.com/alfredyang1986/BmServiceDef/BmApiResolver"
 	"github.com/alfredyang1986/BmServiceDef/BmConfig"
 	"github.com/alfredyang1986/BmServiceDef/BmPodsDefine"
-	"github.com/alfredyang1986/BmServiceDef/BmApiResolver"
 
 	"github.com/PharbersDeveloper/PhAuthServer/PhFactory"
 )
@@ -28,6 +31,10 @@ func main() {
 	prodEnv := os.Getenv(confHome)
 	pod.RegisterSerFromYAML(prodEnv + "/resource/service-def.yaml")
 
+	result := BmConfig.BmGetConfigMap(prodEnv + "/resource/endpoint.json")
+	fmt.Println(result)
+	PhClient.EndPoint.RegisterEndPoint(result)
+
 	var phRouter BmConfig.BmRouterConfig
 	phRouter.GenerateConfig(confHome)
 
@@ -39,9 +46,19 @@ func main() {
 	pod.RegisterAllFunctions(version, api)
 	pod.RegisterAllMiddleware(api)
 
+
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST"},
+	})
+
 	handler := api.Handler().(*httprouter.Router)
+
 	pod.RegisterPanicHandler(handler)
-	http.ListenAndServe(":"+phRouter.Port, handler)
+	http.ListenAndServe(":"+phRouter.Port, c.Handler(handler))
+
+
+
 
 	log.Println("Pharbers Auth Server begins, version =", version)
 }

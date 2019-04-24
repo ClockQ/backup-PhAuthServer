@@ -29,8 +29,8 @@ func (p *PhAuthorizeCodeClientStore) GetByID(id string) (cli oauth2.ClientInfo, 
 		return
 	}
 
-	in := PhModel.OpenClient{ID: id}
-	out := PhModel.OpenClient{ID: id}
+	in := PhModel.Client{ID: id}
+	out := PhModel.Client{ID: id}
 	err = p.mdb.FindOne(&in, &out)
 	if err == nil {
 		cli = Model2ClientInfo(&out)
@@ -48,35 +48,35 @@ func (p *PhAuthorizeCodeClientStore) Set(cli oauth2.ClientInfo) (err error) {
 
 // SetInfo SetInfo call by Set
 func (p *PhAuthorizeCodeClientStore) SetInfo(cli oauth2.ClientInfo) (id string, err error) {
-	model := clientInfo2Model(cli).(*PhModel.OpenClient)
+	model := clientInfo2Model(cli).(*PhModel.Client)
 	id, err = p.mdb.InsertBmObject(model)
 	return
 }
 
 // DelInfo
 func (p *PhAuthorizeCodeClientStore) DelInfo(cli oauth2.ClientInfo) (err error) {
-	model := clientInfo2Model(cli).(*PhModel.OpenClient)
+	model := clientInfo2Model(cli).(*PhModel.Client)
 	err = p.mdb.Delete(model)
 	return
 }
 
 func clientInfo2Model(cli oauth2.ClientInfo) (bmb BmModel.BmModelBase) {
-	bmb = &PhModel.OpenClient{
-		ID:     cli.GetID(),
-		Secret: cli.GetSecret(),
-		Domain: cli.GetDomain(),
-		UserID: cli.GetUserID(),
+	bmb = &PhModel.Client{
+		ClientID:  	cli.GetID(),
+		Secret: 	cli.GetSecret(),
+		Domain: 	cli.GetDomain(),
+		AccountID: 	cli.GetUserID(),
 	}
 	return
 }
 
 func Model2ClientInfo(bmb BmModel.BmModelBase) (cli oauth2.ClientInfo) {
-	model := bmb.(*PhModel.OpenClient)
+	model := bmb.(*PhModel.Client)
 	cli = &models.Client{
-		ID:     model.ID,
+		ID:     model.ClientID,
 		Secret: model.Secret,
 		Domain: model.Domain,
-		UserID: model.UserID,
+		UserID: model.AccountID,
 	}
 	return
 }

@@ -6,14 +6,23 @@ import (
 	"net/url"
 	"strings"
 )
-
+var EndPoint authEndPoint
 type PhToken struct {
 	oauth2.Token
 	Scope     string `json:"scope"`
 	AccountID string `json:"account_id"`
 }
 
-func ConfigFromURIParameter(r *http.Request) *oauth2.Config {
+type authEndPoint struct {
+	AuthURL string
+	TokenURL string
+}
+
+func (e authEndPoint) RegisterEndPoint(value map[string]interface{}) {
+	EndPoint = authEndPoint{value["Auth"].(string), value["Token"].(string)}
+}
+
+func (e authEndPoint) ConfigFromURIParameter(r *http.Request) *oauth2.Config {
 	queryForm, _ := url.ParseQuery(r.URL.RawQuery)
 
 	config := &oauth2.Config{
@@ -22,13 +31,14 @@ func ConfigFromURIParameter(r *http.Request) *oauth2.Config {
 		RedirectURL:  findArrayByKey("redirect_uri", queryForm),
 		Scopes:       strings.Split(findArrayByKey("scope", queryForm), "|"),
 		Endpoint: oauth2.Endpoint{
-			AuthURL:   "http://192.168.100.116:9096/v0/Authorize",
-			TokenURL:  "http://192.168.100.116:9096/v0/Token",
+			AuthURL:  e.AuthURL,
+			TokenURL:  e.TokenURL,
 		},
 	}
 
 	return config
 }
+
 
 func findArrayByKey(key string, values url.Values) string {
 	if r := values[key]; len(r) > 0 {
