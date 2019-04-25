@@ -2,7 +2,7 @@ package PhServer
 
 import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/smartystreets/goconvey/convey"
 	"gopkg.in/oauth2.v3/models"
 	"ph_auth/PhUnits/yaml"
 	"testing"
@@ -21,7 +21,7 @@ func TestTokenStore(t *testing.T) {
 
 	tokenStore, _ := NewAuthorizeCodeTokenStore(&db)
 
-	Convey("Test authorization code store", t, func() {
+	convey.Convey("Test authorization code store", t, func() {
 		info := &models.Token{
 			ClientID:      "1",
 			UserID:        "1_1",
@@ -32,21 +32,21 @@ func TestTokenStore(t *testing.T) {
 			CodeExpiresIn: time.Second * 5,
 		}
 		err := tokenStore.Create(info)
-		So(err, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
 
 		cinfo, err := tokenStore.GetByCode(info.Code)
-		So(err, ShouldBeNil)
-		So(cinfo.GetUserID(), ShouldEqual, info.UserID)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(cinfo.GetUserID(), convey.ShouldEqual, info.UserID)
 
 		err = tokenStore.RemoveByCode(info.Code)
-		So(err, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
 
 		cinfo, err = tokenStore.GetByCode(info.Code)
-		So(err, ShouldBeNil)
-		So(cinfo, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(cinfo, convey.ShouldBeNil)
 	})
 
-	Convey("Test access token store", t, func() {
+	convey.Convey("Test access token store", t, func() {
 		info := &models.Token{
 			ClientID:        "1",
 			UserID:          "1_1",
@@ -57,23 +57,23 @@ func TestTokenStore(t *testing.T) {
 			AccessExpiresIn: time.Second * 5,
 		}
 		err := tokenStore.Create(info)
-		So(err, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
 
 		ainfo, err := tokenStore.GetByAccess(info.GetAccess())
 		println(ainfo)
-		So(err, ShouldBeNil)
-		So(ainfo.GetUserID(), ShouldEqual, info.GetUserID())
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ainfo.GetUserID(), convey.ShouldEqual, info.GetUserID())
 
 		err = tokenStore.RemoveByAccess(info.GetAccess())
-		So(err, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
 
 		ainfo, err = tokenStore.GetByAccess(info.GetAccess())
 		println(ainfo)
-		So(err, ShouldBeNil)
-		So(ainfo, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ainfo, convey.ShouldBeNil)
 	})
 
-	Convey("Test refresh token store", t, func() {
+	convey.Convey("Test refresh token store", t, func() {
 		info := &models.Token{
 			ClientID:         "1",
 			UserID:           "1_2",
@@ -87,21 +87,21 @@ func TestTokenStore(t *testing.T) {
 			RefreshExpiresIn: time.Second * 15,
 		}
 		err := tokenStore.Create(info)
-		So(err, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
 
 		rinfo, err := tokenStore.GetByRefresh(info.GetRefresh())
-		So(err, ShouldBeNil)
-		So(rinfo.GetUserID(), ShouldEqual, info.GetUserID())
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(rinfo.GetUserID(), convey.ShouldEqual, info.GetUserID())
 
 		err = tokenStore.RemoveByRefresh(info.GetRefresh())
-		So(err, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
 
 		rinfo, err = tokenStore.GetByRefresh(info.GetRefresh())
-		So(err, ShouldBeNil)
-		So(rinfo, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(rinfo, convey.ShouldBeNil)
 	})
 
-	Convey("Test TTL", t, func() {
+	convey.Convey("Test TTL", t, func() {
 		info := &models.Token{
 			ClientID:         "1",
 			UserID:           "1_1",
@@ -115,14 +115,14 @@ func TestTokenStore(t *testing.T) {
 			RefreshExpiresIn: time.Second * 1,
 		}
 		err := tokenStore.Create(info)
-		So(err, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
 
 		time.Sleep(time.Second * 1)
 		ainfo, err := tokenStore.GetByAccess(info.Access)
-		So(err, ShouldBeNil)
-		So(ainfo, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ainfo, convey.ShouldBeNil)
 		rinfo, err := tokenStore.GetByRefresh(info.Refresh)
-		So(err, ShouldBeNil)
-		So(rinfo, ShouldBeNil)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(rinfo, convey.ShouldBeNil)
 	})
 }
