@@ -22,7 +22,7 @@ func main() {
 		confHome = "PH_AUTH_HOME"
 	)
 	// 本机测试，添加上
-	//os.Setenv(confHome, "resources")
+	os.Setenv(confHome, "resources")
 	log.Println("Pharbers Auth Server begins, version =", version)
 
 	fac := PhFactory.PhTable{}
