@@ -1,10 +1,10 @@
 package yaml
 
 import (
-	"io/ioutil"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"github.com/alfredyang1986/BmServiceDef/BmPodsDefine"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 func LoadConfFromYAML(path string) (conf *BmPodsDefine.Conf) {

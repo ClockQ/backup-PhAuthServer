@@ -2,23 +2,23 @@ package PhHandler
 
 import (
 	"fmt"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
-	"gopkg.in/oauth2.v3/errors"
-	"net/http"
-	"reflect"
 	"github.com/julienschmidt/httprouter"
-	"gopkg.in/oauth2.v3/server"
 	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/oauth2.v3/errors"
+	"gopkg.in/oauth2.v3/server"
+	"net/http"
+	"ph_auth/PhUnits/array"
+	"reflect"
 	"strings"
 
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 
-	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
-	"time"
 	"encoding/json"
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
+	"ph_auth/PhModel"
+	"ph_auth/PhServer"
+	"time"
 )
 
 type PhTokenHandler struct {
@@ -102,7 +102,7 @@ func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, 
 
 	for _, applyScope := range applyScopes {
 		detailScope := strings.Split(applyScope, "/")
-		level := detailScope[0] // Pharbers 官网 App 单个系统
+		level := detailScope[0]  // Pharbers 官网 App 单个系统
 		action := detailScope[1] // 申请的动作表述
 
 		prefix, applyScopes := scopeSplit(action)
@@ -135,19 +135,19 @@ func (h PhTokenHandler) GetHandlerMethod() string {
 	return h.Method
 }
 
-func singleAppGetScope(accScope []*PhModel.Scope,  applyScopes []string,  prefix, level string) (bool, string) {
+func singleAppGetScope(accScope []*PhModel.Scope, applyScopes []string, prefix, level string) (bool, string) {
 	var (
-		scope string
+		scope     string
 		scopeTemp map[string][]string
-		temp []string
+		temp      []string
 	)
 	scopeTemp = make(map[string][]string)
 	for _, v := range accScope {
-		temp = append(temp, v.Level + ":" + v.Value)
+		temp = append(temp, v.Level+":"+v.Value)
 	}
 	for _, applyScope := range applyScopes {
-		if array.IsExistItem(prefix + ":" + applyScope, temp) {
-			scopeTemp[prefix]= append(scopeTemp[prefix], applyScope)
+		if array.IsExistItem(prefix+":"+applyScope, temp) {
+			scopeTemp[prefix] = append(scopeTemp[prefix], applyScope)
 		} else {
 			return true, ""
 		}

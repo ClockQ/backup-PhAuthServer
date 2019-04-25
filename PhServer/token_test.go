@@ -1,12 +1,12 @@
 package PhServer
 
 import (
-	"time"
-	"testing"
-	"gopkg.in/oauth2.v3/models"
-	. "github.com/smartystreets/goconvey/convey"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/yaml"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	. "github.com/smartystreets/goconvey/convey"
+	"gopkg.in/oauth2.v3/models"
+	"ph_auth/PhUnits/yaml"
+	"testing"
+	"time"
 )
 
 func TestTokenStore(t *testing.T) {

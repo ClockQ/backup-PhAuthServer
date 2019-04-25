@@ -9,30 +9,28 @@ type Account struct {
 	ID  string        `json:"-"`
 	Id_ bson.ObjectId `json:"-" bson:"_id"`
 
-	Email    	string `json:"email" bson:"email"`
-	Password 	string `json:"password" bson:"password"`
-	Nickname 	string `json:"nickname" bson:"nickname"`
-	Gender		int		`json:"gender" bson:"gender"`
+	Email    string `json:"email" bson:"email"`
+	Password string `json:"password" bson:"password"`
+	Nickname string `json:"nickname" bson:"nickname"`
+	Gender   int    `json:"gender" bson:"gender"`
 
-	CompanyID	string	`json:"-" bson:"company-id"`
-	Company		*Company `json:"-"`
+	CompanyID string   `json:"-" bson:"company-id"`
+	Company   *Company `json:"-"`
 
-	DepartmentID	string	`json:"-" bson:"department-id"`
-	Department		*Department `json:"-"`
+	DepartmentID string      `json:"-" bson:"department-id"`
+	Department   *Department `json:"-"`
 
 	//ClientID		string	`json:"-" bson:"client-id"`
 	//Client			*Client	`json:"-"`
 
-	ScopeIDs		[]string	`json:"-" bson:"scope-ids"`
-	Scopes			[]*Scope		`json:"-"`
+	ScopeIDs []string `json:"-" bson:"scope-ids"`
+	Scopes   []*Scope `json:"-"`
 
-	ImageID		string	`json:"-" bson:"image-id"`
-	Image		*Image 	`json:"-"`
+	ImageID string `json:"-" bson:"image-id"`
+	Image   *Image `json:"-"`
 
-
-
-	Phone    string `json:"phone" bson:"phone"`
-	Scope    string `json:"scope" bson:"scope"`
+	Phone string `json:"phone" bson:"phone"`
+	Scope string `json:"scope" bson:"scope"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface
@@ -92,7 +90,6 @@ func (u Account) GetReferencedIDs() []jsonapi.ReferenceID {
 		})
 	}
 
-
 	if u.DepartmentID != "" {
 		result = append(result, jsonapi.ReferenceID{
 			ID:   u.DepartmentID,
@@ -100,7 +97,6 @@ func (u Account) GetReferencedIDs() []jsonapi.ReferenceID {
 			Name: "department",
 		})
 	}
-
 
 	//if u.ClientID != "" {
 	//	result = append(result, jsonapi.ReferenceID{
@@ -120,16 +116,13 @@ func (u Account) GetReferencedStructs() []jsonapi.MarshalIdentifier {
 		result = append(result, u.Image)
 	}
 
-
 	if u.CompanyID != "" && u.Company != nil {
 		result = append(result, u.Company)
 	}
 
-
 	if u.DepartmentID != "" && u.Department != nil {
 		result = append(result, u.Department)
 	}
-
 
 	//if u.ClientID != "" && u.Client != nil {
 	//	result = append(result, u.Client)

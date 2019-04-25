@@ -3,8 +3,6 @@ package PhServer
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/array"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"gopkg.in/mgo.v2/bson"
@@ -13,6 +11,8 @@ import (
 	"gopkg.in/oauth2.v3/server"
 	"log"
 	"net/http"
+	"ph_auth/PhModel"
+	"ph_auth/PhUnits/array"
 	"strings"
 )
 
@@ -125,7 +125,7 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 
 		for _, applyScope := range applyScopes {
 			detailScope := strings.Split(applyScope, "/")
-			level := detailScope[0] // Pharbers 官网 App 单个系统
+			level := detailScope[0]  // Pharbers 官网 App 单个系统
 			action := detailScope[1] // 申请的动作表述
 
 			prefix, applyScopes := scopeSplit(action)
@@ -147,37 +147,37 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 	return
 }
 
-func topLevelGetScope(accScope []*PhModel.Scope, level,prefix string) string {
-		var (
-			scope string
-			scopeTemp map[string][]string
-		)
+func topLevelGetScope(accScope []*PhModel.Scope, level, prefix string) string {
+	var (
+		scope     string
+		scopeTemp map[string][]string
+	)
 	scopeTemp = make(map[string][]string)
 
-		for _, s := range accScope {
-			if s.Level == prefix {
-				scopeTemp[prefix]= append(scopeTemp[prefix], s.Value)
-			}
+	for _, s := range accScope {
+		if s.Level == prefix {
+			scopeTemp[prefix] = append(scopeTemp[prefix], s.Value)
 		}
+	}
 
-		body, _ := json.Marshal(scopeTemp)
-		scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"), "|")
-		return scope
+	body, _ := json.Marshal(scopeTemp)
+	scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"), "|")
+	return scope
 }
 
-func singleAppGetScope(accScope []*PhModel.Scope,  applyScopes []string,  prefix, level string) (bool, string) {
+func singleAppGetScope(accScope []*PhModel.Scope, applyScopes []string, prefix, level string) (bool, string) {
 	var (
-		scope string
+		scope     string
 		scopeTemp map[string][]string
-		temp []string
+		temp      []string
 	)
 	scopeTemp = make(map[string][]string)
 	for _, v := range accScope {
-		temp = append(temp, v.Level + ":" + v.Value)
+		temp = append(temp, v.Level+":"+v.Value)
 	}
 	for _, applyScope := range applyScopes {
-		if array.IsExistItem(prefix + ":" + applyScope, temp) {
-			scopeTemp[prefix]= append(scopeTemp[prefix], applyScope)
+		if array.IsExistItem(prefix+":"+applyScope, temp) {
+			scopeTemp[prefix] = append(scopeTemp[prefix], applyScope)
 		} else {
 			return true, ""
 		}

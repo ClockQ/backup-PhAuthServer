@@ -7,15 +7,15 @@ import (
 )
 
 type Company struct {
-	ID  		string        `json:"-"`
-	Id_ 		bson.ObjectId `json:"-" bson:"_id"`
-	Name		string	`json:"name" bson:"name"`
-	Level		string	`json:"level" bson:"level"`
-	Location	string	`json:"location" bson:"location"`
-	Industry	string	`json:"industry" bson:"industry"`
-	Describe	string	`json:"describe" bson:"describe"`
-	ImageID		string	`json:"-" bson:"image-id"`
-	Image		*Image 	`json:"-"`
+	ID       string        `json:"-"`
+	Id_      bson.ObjectId `json:"-" bson:"_id"`
+	Name     string        `json:"name" bson:"name"`
+	Level    string        `json:"level" bson:"level"`
+	Location string        `json:"location" bson:"location"`
+	Industry string        `json:"industry" bson:"industry"`
+	Describe string        `json:"describe" bson:"describe"`
+	ImageID  string        `json:"-" bson:"image-id"`
+	Image    *Image        `json:"-"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

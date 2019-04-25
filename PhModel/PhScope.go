@@ -5,11 +5,11 @@ import (
 )
 
 type Scope struct {
-	ID  		string        `json:"-"`
-	Id_ 		bson.ObjectId `json:"-" bson:"_id"`
-	Level		string	`json:"level" bson:"level"`
-	Value		string	`json:"value" bson:"value"`
-	Describe	string	`json:"describe" bson:"describe"`
+	ID       string        `json:"-"`
+	Id_      bson.ObjectId `json:"-" bson:"_id"`
+	Level    string        `json:"level" bson:"level"`
+	Value    string        `json:"value" bson:"value"`
+	Describe string        `json:"describe" bson:"describe"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

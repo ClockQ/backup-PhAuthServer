@@ -2,7 +2,6 @@ package PhHandler
 
 import (
 	"fmt"
-	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
@@ -10,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"ph_auth/PhClient"
 	"reflect"
 	"strings"
 )
@@ -62,7 +62,7 @@ func (h PhUserAgentHandler) ThirdParty(w http.ResponseWriter, r *http.Request, _
 
 	config := PhClient.EndPoint.ConfigFromURIParameter(r)
 	redirectUrl := config.AuthCodeURL("xyz")
-	if v := queryForm["status"]; len(v) > 0 && v[0] == "self"{
+	if v := queryForm["status"]; len(v) > 0 && v[0] == "self" {
 		redirectUrl += "&status=" + v[0]
 
 		// 转发

@@ -5,10 +5,10 @@ import (
 )
 
 type Department struct {
-	ID  		string        `json:"-"`
-	Id_ 		bson.ObjectId `json:"-" bson:"_id"`
-	Name 		string	`json:"name" bson:"name"`
-	Describe	string	`json:"describe" bson:"describe"`
+	ID       string        `json:"-"`
+	Id_      bson.ObjectId `json:"-" bson:"_id"`
+	Name     string        `json:"name" bson:"name"`
+	Describe string        `json:"describe" bson:"describe"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

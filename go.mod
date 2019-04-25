@@ -27,8 +27,8 @@ require (
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/manyminds/api2go v0.0.0-20190324173508-d4f7fae65b4b
 	github.com/rs/cors v1.6.0
-	golang.org/x/oauth2 v0.0.0-00010101000000-000000000000 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
-	gopkg.in/oauth2.v3 v3.10.0 // indirect
+	golang.org/x/oauth2 v0.0.0-00010101000000-000000000000
+	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
+	gopkg.in/oauth2.v3 v3.10.0
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

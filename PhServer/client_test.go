@@ -1,11 +1,11 @@
 package PhServer
 
 import (
-	"testing"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/oauth2.v3/models"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/yaml"
+	"ph_auth/PhUnits/yaml"
+	"testing"
 )
 
 func TestClientStore(t *testing.T) {

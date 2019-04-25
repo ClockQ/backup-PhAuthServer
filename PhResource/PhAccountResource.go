@@ -2,18 +2,17 @@ package PhResource
 
 import (
 	"errors"
-	"reflect"
-	"net/http"
-	"github.com/manyminds/api2go"
 	"github.com/alfredyang1986/BmServiceDef/BmDataStorage"
+	"github.com/manyminds/api2go"
+	"net/http"
+	"reflect"
 
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"github.com/PharbersDeveloper/PhAuthServer/PhDataStorage"
+	"ph_auth/PhDataStorage"
+	"ph_auth/PhModel"
 )
 
 type PhAccountResource struct {
 	PhAccountStorage *PhDataStorage.PhAccountStorage
-
 }
 
 func (c PhAccountResource) NewAccountResource(args []BmDataStorage.BmStorage) *PhAccountResource {

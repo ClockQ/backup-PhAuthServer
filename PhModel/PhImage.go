@@ -5,11 +5,11 @@ import (
 )
 
 type Image struct {
-	ID  string        `json:"-"`
-	Id_ bson.ObjectId `json:"-" bson:"_id"`
-	Img		string	`json:"img" bson:"img"`
-	Tag		string	`json:"tag" bson:"tag"`
-	Flag	int		`json:"flag" bson:"flag"`
+	ID   string        `json:"-"`
+	Id_  bson.ObjectId `json:"-" bson:"_id"`
+	Img  string        `json:"img" bson:"img"`
+	Tag  string        `json:"tag" bson:"tag"`
+	Flag int           `json:"flag" bson:"flag"`
 }
 
 // GetID to satisfy jsonapi.MarshalIdentifier interface

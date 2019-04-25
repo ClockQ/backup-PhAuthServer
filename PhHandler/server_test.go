@@ -1,8 +1,6 @@
 package PhHandler
 
 import (
-	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/yaml"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/gavv/httpexpect"
@@ -11,6 +9,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"ph_auth/PhServer"
+	"ph_auth/PhUnits/yaml"
 	"testing"
 )
 
@@ -106,12 +106,12 @@ func TestRedirectEndPoint(t *testing.T) {
 	e := httpexpect.New(t, "http://127.0.0.1:9096/v0")
 
 	e.GET("/ThirdParty").
-			WithQuery("client_id", clientID).
-			WithQuery("client_secret", clientSecret).
-			WithQuery("scope", "ALL").
-			WithQuery("state", "xyz").
-			WithQuery("redirect_uri", "http://192.168.0.104:4433/oauth-callback").
-			Expect().Status(http.StatusOK)
+		WithQuery("client_id", clientID).
+		WithQuery("client_secret", clientSecret).
+		WithQuery("scope", "ALL").
+		WithQuery("state", "xyz").
+		WithQuery("redirect_uri", "http://192.168.0.104:4433/oauth-callback").
+		Expect().Status(http.StatusOK)
 
 	//outPut := map[string]string{}
 	//body,err := ioutil.ReadAll(response.Body())

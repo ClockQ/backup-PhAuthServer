@@ -94,7 +94,7 @@ func (e *tPhrror) ErrorReval(err interface{}, w http.ResponseWriter) {
 	resetlHTTPErrorID(hr)
 	enc := json.NewEncoder(w)
 	w.Header().Add("Content-Type", "application/json")
-	statusCode,  _ := strconv.Atoi(hr.Errors[0].Status)
+	statusCode, _ := strconv.Atoi(hr.Errors[0].Status)
 	w.WriteHeader(statusCode)
 	enc.Encode(hr)
 }
