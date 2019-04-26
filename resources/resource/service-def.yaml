@@ -117,7 +117,8 @@ daemons:
 #    database: pharbers-authentication
     host: 192.168.100.174
     port: 27017
-    database: pharbers-auth-server
+#    database: pharbers-auth-server
+    database: jeo_test
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:

@@ -257,7 +257,7 @@ func TestRedirectEndPoint(t *testing.T) {
 //
 //	t.Logf("%#v\n", resObj.Raw())
 //
-//	validationAccessToken(t, resObj.Value("access_token").String().Raw())
+//	validationAccessToken(t, resObj.Operation("access_token").String().Raw())
 //}
 //
 //func TestClientCredentials(t *testing.T) {
@@ -308,7 +308,7 @@ func TestRedirectEndPoint(t *testing.T) {
 //
 //	t.Logf("%#v\n", resObj.Raw())
 //
-//	validationAccessToken(t, resObj.Value("access_token").String().Raw())
+//	validationAccessToken(t, resObj.Operation("access_token").String().Raw())
 //}
 
 func TestRefreshing(t *testing.T) {

@@ -65,7 +65,6 @@ func clientInfo2Model(cli oauth2.ClientInfo) (bmb BmModel.BmModelBase) {
 		ClientID:  cli.GetID(),
 		Secret:    cli.GetSecret(),
 		Domain:    cli.GetDomain(),
-		AccountID: cli.GetUserID(),
 	}
 	return
 }
@@ -76,7 +75,6 @@ func Model2ClientInfo(bmb BmModel.BmModelBase) (cli oauth2.ClientInfo) {
 		ID:     model.ClientID,
 		Secret: model.Secret,
 		Domain: model.Domain,
-		UserID: model.AccountID,
 	}
 	return
 }

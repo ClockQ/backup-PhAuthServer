@@ -21,7 +21,6 @@ replace google.golang.org/appengine => github.com/golang/appengine v1.4.0
 go 1.12
 
 require (
-	github.com/PharbersDeveloper/PhAuthServer v0.0.0-20190424041951-c99c688efad6
 	github.com/alfredyang1986/BmServiceDef v0.0.0-20190410064517-b341f9e1e85e
 	github.com/alfredyang1986/blackmirror v0.0.0-20190305121812-d8d7643fb552 // indirect
 	github.com/gavv/httpexpect v1.0.0 // indirect
