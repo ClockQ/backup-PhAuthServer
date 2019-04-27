@@ -107,7 +107,7 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 		cond := bson.M{"_id": bson.ObjectIdHex(userID)}
 		err = mdb.FindOneByCondition(&accRes, &accOut, cond)
 		if err != nil {
-			w.Header().Set("Location", "http://www.baidu.com") // TODO：暂定跳转百度
+			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
 			w.WriteHeader(http.StatusFound)
 			return
 		}
@@ -115,7 +115,7 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 		empModel := PhModel.Employee{}
 		err = mdb.FindOneByCondition(&empModel, &empModel, bson.M{"_id": bson.ObjectIdHex(accOut.EmployeeID)})
 		if err != nil {
-			w.Header().Set("Location", "http://www.baidu.com") // TODO：暂定跳转百度
+			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
 			w.WriteHeader(http.StatusFound)
 			return
 		}
@@ -134,7 +134,7 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 				scopeModels[i] = iter
 			}
 		} else {
-			w.Header().Set("Location", "http://www.baidu.com") // TODO：暂定跳转百度
+			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
 			w.WriteHeader(http.StatusFound)
 			return
 		}
@@ -148,7 +148,7 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 			scope = level + "/" + scop
 			return
 		} else {
-			w.Header().Set("Location", "http://www.baidu.com") // TODO：暂定跳转百度
+			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
 			w.WriteHeader(http.StatusFound)
 			return
 		}
