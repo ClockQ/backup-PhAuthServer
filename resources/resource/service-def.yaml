@@ -41,8 +41,8 @@ functions:
   args:
   - Auth
   - Authorize
-  - http://192.168.100.174:9096
-#  - http://oauth.pharbers.com
+#  - http://192.168.100.174:9096
+  - http://oauth.pharbers.com
 - name: PhTokenHandler
   create: NewTokenHandler
   daemons:
@@ -112,19 +112,18 @@ daemons:
 - name: BmMongodbDaemon
   method: NewMongoDBDaemon
   args:
-#    host: primary
-#    port: 27017
-#    database: pharbers-authentication
-    host: 192.168.100.174
+    host: primary
     port: 27017
-#    database: pharbers-auth-server
-    database: jeo_test
+    database: pharbers-auth-server
+#    host: 192.168.100.174
+#    port: 27017
+#    database: jeo_test
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
-#    host: redis
-#    port: 6379
-    host: 192.168.100.174
+    host: redis
     port: 6379
+#    host: 192.168.100.174
+#    port: 6379
     password:
     database: 0
