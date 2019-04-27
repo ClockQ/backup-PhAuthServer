@@ -2,7 +2,6 @@ package PhHandler
 
 import (
 	"fmt"
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
@@ -10,6 +9,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"net/url"
+	"ph_auth/PhModel"
 	"reflect"
 	"strings"
 	"time"
@@ -92,7 +92,7 @@ func (h PhAccountHandler) AccountValidation(w http.ResponseWriter, r *http.Reque
 
 	queryForm, _ := url.ParseQuery(r.URL.RawQuery)
 
-	if v := queryForm["status"]; len(v) > 0 && v[0] == "self"{
+	if v := queryForm["status"]; len(v) > 0 && v[0] == "self" {
 		fmt.Println(toUrl)
 		w.Write([]byte(h.Args[2] + toUrl))
 		return 0

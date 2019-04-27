@@ -3,8 +3,6 @@ package PhHandler
 import (
 	"context"
 	"encoding/json"
-	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
-	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
@@ -14,10 +12,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"ph_auth/PhClient"
+	"ph_auth/PhServer"
 	"reflect"
 	"time"
 )
-
 
 type PhAuthorizeHandler struct {
 	Method     string
@@ -90,7 +89,7 @@ func (h PhAuthorizeHandler) GenerateAccessToken(w http.ResponseWriter, r *http.R
 	json.Unmarshal([]byte(initialToken), &oauthPrototype)
 
 	phToken := PhClient.PhToken{
-		Scope: accessToken.Extra("scope").(string),
+		Scope:     accessToken.Extra("scope").(string),
 		AccountID: oauthPrototype["UserID"].(string),
 	}
 	phToken.AccessToken = accessToken.AccessToken
@@ -99,7 +98,7 @@ func (h PhAuthorizeHandler) GenerateAccessToken(w http.ResponseWriter, r *http.R
 	phToken.TokenType = accessToken.TokenType
 
 	// 存入Redis RefreshToken
-	err = h.PushValueByKey("RefreshToken_" + phToken.RefreshToken, &phToken)
+	err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 1
@@ -127,7 +126,6 @@ func (h PhAuthorizeHandler) RefreshAccessToken(w http.ResponseWriter, r *http.Re
 
 	config := PhClient.EndPoint.ConfigFromURIParameter(r)
 
-
 	token := &oauth2.Token{}
 	tokenResult, err := h.RdGetValueByKey("RefreshToken_" + refreshToken)
 	if err != nil {
@@ -147,7 +145,7 @@ func (h PhAuthorizeHandler) RefreshAccessToken(w http.ResponseWriter, r *http.Re
 	json.Unmarshal([]byte(initialToken), &oauthPrototype)
 
 	phToken := PhClient.PhToken{
-		Scope: accessToken.Extra("scope").(string),
+		Scope:     accessToken.Extra("scope").(string),
 		AccountID: oauthPrototype["UserID"].(string),
 	}
 	phToken.AccessToken = accessToken.AccessToken
@@ -161,7 +159,7 @@ func (h PhAuthorizeHandler) RefreshAccessToken(w http.ResponseWriter, r *http.Re
 	}
 
 	// 存入Redis RefreshToken
-	err = h.PushValueByKey("RefreshToken_" + phToken.RefreshToken, &phToken)
+	err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 1
@@ -191,7 +189,7 @@ func (h PhAuthorizeHandler) PasswordLogin(w http.ResponseWriter, r *http.Request
 	json.Unmarshal([]byte(initialToken), &oauthPrototype)
 
 	phToken := PhClient.PhToken{
-		Scope: accessToken.Extra("scope").(string),
+		Scope:     accessToken.Extra("scope").(string),
 		AccountID: oauthPrototype["UserID"].(string),
 	}
 	phToken.AccessToken = accessToken.AccessToken
@@ -200,7 +198,7 @@ func (h PhAuthorizeHandler) PasswordLogin(w http.ResponseWriter, r *http.Request
 	phToken.TokenType = accessToken.TokenType
 
 	// 存入Redis RefreshToken
-	err = h.PushValueByKey("RefreshToken_" + phToken.RefreshToken, &phToken)
+	err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 1
@@ -239,14 +237,14 @@ func (h PhAuthorizeHandler) PushValueByKey(key string, value interface{}) error 
 	return err
 }
 
-func (h PhAuthorizeHandler) RdGetValueByKey(key string) (string, error){
+func (h PhAuthorizeHandler) RdGetValueByKey(key string) (string, error) {
 	client := h.rd.GetRedisClient()
 	defer client.Close()
 
 	result, err := client.Get(key).Result()
 
 	if err != nil {
-		return "" ,err
+		return "", err
 	}
 	return result, nil
 }

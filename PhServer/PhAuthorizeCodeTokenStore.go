@@ -1,12 +1,12 @@
 package PhServer
 
 import (
-	"time"
 	"encoding/json"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/uuid"
+	"ph_auth/PhUnits/uuid"
+	"time"
 )
 
 // NewAuthorizeCodeTokenStore create a token store instance based on redis

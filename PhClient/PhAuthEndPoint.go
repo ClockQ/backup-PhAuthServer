@@ -6,7 +6,9 @@ import (
 	"net/url"
 	"strings"
 )
+
 var EndPoint authEndPoint
+
 type PhToken struct {
 	oauth2.Token
 	Scope     string `json:"scope"`
@@ -14,7 +16,7 @@ type PhToken struct {
 }
 
 type authEndPoint struct {
-	AuthURL string
+	AuthURL  string
 	TokenURL string
 }
 
@@ -32,13 +34,12 @@ func (e authEndPoint) ConfigFromURIParameter(r *http.Request) *oauth2.Config {
 		Scopes:       strings.Split(findArrayByKey("scope", queryForm), "|"),
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  e.AuthURL,
-			TokenURL:  e.TokenURL,
+			TokenURL: e.TokenURL,
 		},
 	}
 
 	return config
 }
-
 
 func findArrayByKey(key string, values url.Values) string {
 	if r := values[key]; len(r) > 0 {

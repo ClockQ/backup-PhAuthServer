@@ -1,31 +1,24 @@
 #源镜像
-FROM golang:alpine
-
-#作者
-MAINTAINER Pharbers "zyqi@pharbers.com"
+FROM    golang:alpine
 
 #LABEL
-LABEL 	PhAuthServer.version="1.0.0" maintainer="ClockQ"
+LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.1"
 
-# ??
-# RUN apk add --no-cache git mercurial
+# 安装git
+RUN     apk add --no-cache git mercurial
 
 # 下载依赖
-# RUN go get github.com/alfredyang1986/blackmirror
-# RUN go get github.com/alfredyang1986/BmServiceDef
-# RUN go get github.com/PharbersDeveloper/NtmPods
-ADD 	 src/	$GOPATH/src/
-ADD      src/github.com/PharbersDeveloper/PhAuthServer/static/  $GOPATH/bin/static/
+RUN     go get github.com/PharbersDeveloper/PhAuthServer
+ADD     src/github.com/PharbersDeveloper/PhAuthServer/static/  $GOPATH/bin/static/
 
 # 设置工程配置文件的环境变量
 ENV     PH_AUTH_HOME $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer/resources
 
-
 # 构建可执行文件
-RUN go install -v github.com/PharbersDeveloper/PhAuthServer
+RUN     go install -v github.com/PharbersDeveloper/PhAuthServer
 
 # 暴露端口
-EXPOSE 9096
+EXPOSE  9096
 
 # 设置工作目录
 WORKDIR $GOPATH/bin
