@@ -2,7 +2,7 @@
 FROM    golang:alpine
 
 #LABEL
-LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.1"
+LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.3"
 
 # 安装git
 RUN     apk add --no-cache git mercurial
