@@ -3,13 +3,12 @@ package PhHandler
 import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"github.com/manyminds/api2go"
-	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/server"
 	"net/http"
 	"ph_auth/PhUnits/array"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
@@ -81,45 +80,29 @@ func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, 
 		panic(err.Error())
 	}
 
-	//TODO:存在Redis中的token信息[Scope信息]无具体操作权限,如果能Set进去,就不用查询数据库,毕竟页面验证比较频繁 => 不用访问数据库查询Scope?
-	accRes := PhModel.Account{}
-	accOut := PhModel.Account{}
-	cond := bson.M{"_id": bson.ObjectIdHex(token.GetUserID())}
-	err = h.db.FindOneByCondition(&accRes, &accOut, cond)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	empModel := PhModel.Employee{}
-	err = h.db.FindOneByCondition(&empModel, &empModel, bson.M{"_id": bson.ObjectIdHex(accOut.EmployeeID)})
-	if err != nil {
-		panic(err.Error())
-	}
-
-	scopeReq := api2go.Request{
-		QueryParams: map[string][]string{
-			"group-id": {empModel.GroupID},
-		},
-	}
-	scopeIn := PhModel.Scope{}
-	var scopeModels []PhModel.Scope
-	err = h.db.FindMulti(scopeReq, &scopeIn, &scopeModels, -1, -1)
-	if err == nil {
-		for i, iter := range scopeModels {
-			h.db.ResetIdWithId_(&iter)
-			scopeModels[i] = iter
-		}
-	} else {
-		panic(err.Error())
-	}
-
 	applyScope := token.GetScope()	// 申请Scope
-
 	detailScope := strings.Split(applyScope, "/")
-	//level := detailScope[0]       // Pharbers 官网 App 单个系统
-	applyAccess := strings.Split(detailScope[1], ":")[0] // 申请的动作表述
-	accessed := checkAccessScope(applyAccess, scopeModels)	//允许访问(判断是否有授权)
-	indate := checkIndateScope(applyAccess, scopeModels)	//有效期内(判断授权是否过期)
+	//level := detailScope[0]       	// Pharbers 官网 App 单个系统
+	applyAccessOpt := detailScope[1] 	// 申请的项目及动作表述
+	fmt.Println(applyAccessOpt)
+
+	accessToken := token.GetAccess()
+	redisClient := h.rd.GetRedisClient()
+	tokenUUID, err := redisClient.Get(accessToken).Result()
+	if err != nil {
+		panic(err.Error())
+	}
+	initialToken, err := redisClient.Get(tokenUUID).Result()
+	if err != nil {
+		panic(err.Error())
+	}
+	var oauthPrototype map[string]interface{}
+	json.Unmarshal([]byte(initialToken), &oauthPrototype)
+
+	userScope := oauthPrototype["Scope"].(string)
+
+	accessed, accessOpt := checkAccessScope(applyAccessOpt, userScope)	//允许访问(判断是否有授权)
+	indate := checkIndateScope(accessOpt)	//有效期内(判断授权是否过期)
 	if accessed && indate {
 		data := map[string]interface{}{
 			"expires_in":         int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
@@ -186,32 +169,46 @@ func scopeSplit(scope string) (string, []string) {
 	return prefix, nil
 }
 
-func checkAccessScope(applyAccess string, accScopes []PhModel.Scope) (accessed bool) {
+func checkAccessScope(applyAccessOpt string, userScope string) (accessed bool, accessOpt string) {
 
 	accessed = false
-	for _, v := range accScopes {
-		if v.Access == applyAccess {
-			operations := strings.Split(v.Operation, "#")
-			if checkOperationScope(operations[1]) {
-				accessed = true
-				return
-			}
+	applyAccess := strings.Split(applyAccessOpt, ":")[0]
+	userAccessOpts := strings.Split(userScope, "/")[1]
+	userAccessOptArr := strings.Split(userAccessOpts, ",")
+	for _, userAccessOpt := range userAccessOptArr {
+		userAccess := strings.Split(userAccessOpt, ":")[0]
+		if userAccess == applyAccess {
+			//TODO:目前只是检查有无访问项目的权限，还未进行具体操作权限的check => func checkOperationScope(operationCmd string) (allowed bool) {}
+			accessed = true
+			accessOpt = userAccessOpt
+			return
 		}
 	}
+	accessOpt = applyAccessOpt
 	return
 }
 
-func checkIndateScope(applyAccess string, accScopes []PhModel.Scope) (indate bool) {
+func checkIndateScope(accessOpt string) (indate bool) {
 
 	indate = false
-	for _, v := range accScopes {
-		if v.Access == applyAccess {
-			now := float64(time.Now().UnixNano() / 1e6)
-			if now < v.Expired {
-				indate = true
-				return
-			}
-		}
+	accessOptArr := strings.Split(accessOpt, ":")
+	if len(accessOptArr) < 2 { //项目名+操作
+		return
+	}
+	operation := accessOptArr[1]
+	optExpArr := strings.Split(operation, "#")
+	if len(optExpArr) < 3 {	//操作范围+具体操作+过期时间
+		return
+	}
+	expired, err := strconv.ParseFloat(optExpArr[2], 64)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	now := float64(time.Now().UnixNano() / 1e6)
+	if expired > now {
+		indate = true
+		return
 	}
 	return
 }

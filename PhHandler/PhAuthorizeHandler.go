@@ -3,16 +3,20 @@ package PhHandler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/julienschmidt/httprouter"
+	"github.com/manyminds/api2go"
 	"golang.org/x/oauth2"
+	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/oauth2.v3/server"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"ph_auth/PhClient"
+	"ph_auth/PhModel"
 	"ph_auth/PhServer"
 	"reflect"
 	"time"
@@ -180,22 +184,71 @@ func (h PhAuthorizeHandler) PasswordLogin(w http.ResponseWriter, r *http.Request
 	json.Unmarshal(body, &parameter)
 
 	config := PhClient.EndPoint.ConfigFromURIParameter(r)
-	accessToken, err := config.PasswordCredentialsToken(context.Background(), parameter["username"].(string), parameter["password"].(string))
+	token, err := config.PasswordCredentialsToken(context.Background(), parameter["username"].(string), parameter["password"].(string))
 
 	// 获取AuthServer 存入的UserID
-	tokenUid, _ := h.RdGetValueByKey(accessToken.AccessToken)
-	initialToken, _ := h.RdGetValueByKey(tokenUid)
+	tokenUUID, _ := h.RdGetValueByKey(token.AccessToken)
+	initialToken, _ := h.RdGetValueByKey(tokenUUID)
 	var oauthPrototype map[string]interface{}
 	json.Unmarshal([]byte(initialToken), &oauthPrototype)
 
+	accRes := PhModel.Account{}
+	accOut := PhModel.Account{}
+	cond := bson.M{"_id": bson.ObjectIdHex(oauthPrototype["UserID"].(string))}
+	err = h.db.FindOneByCondition(&accRes, &accOut, cond)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	empModel := PhModel.Employee{}
+	err = h.db.FindOneByCondition(&empModel, &empModel, bson.M{"_id": bson.ObjectIdHex(accOut.EmployeeID)})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	scopeReq := api2go.Request{
+		QueryParams: map[string][]string{
+			"group-id": {empModel.GroupID},
+		},
+	}
+	scopeIn := PhModel.Scope{}
+	var scopeModels []PhModel.Scope
+	err = h.db.FindMulti(scopeReq, &scopeIn, &scopeModels, -1, -1)
+	if err == nil {
+		for i, iter := range scopeModels {
+			h.db.ResetIdWithId_(&iter)
+			scopeModels[i] = iter
+		}
+	} else {
+		panic(err.Error())
+	}
+
 	phToken := PhClient.PhToken{
-		Scope:     accessToken.Extra("scope").(string),
+		Scope:     token.Extra("scope").(string),
 		AccountID: oauthPrototype["UserID"].(string),
 	}
-	phToken.AccessToken = accessToken.AccessToken
-	phToken.RefreshToken = accessToken.RefreshToken
-	phToken.Expiry = accessToken.Expiry
-	phToken.TokenType = accessToken.TokenType
+
+	if len(scopeModels) != 0 {
+		phToken.Scope = makeScopeStr(scopeModels)
+
+		if len(oauthPrototype) == 0 {
+			panic("oauthPrototype is empty")
+		}
+		oauthPrototype["Scope"] = phToken.Scope
+		expired := int64(oauthPrototype["AccessExpiresIn"].(float64))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return 1
+		}
+
+		h.PushValueByKeyAndExpire(tokenUUID, oauthPrototype, 10 * time.Duration(expired))
+
+	}
+
+	phToken.AccessToken = token.AccessToken
+	phToken.RefreshToken = token.RefreshToken
+	phToken.Expiry = token.Expiry
+	phToken.TokenType = token.TokenType
 
 	// 存入Redis RefreshToken
 	err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
@@ -231,7 +284,18 @@ func (h PhAuthorizeHandler) PushValueByKey(key string, value interface{}) error 
 	pipe := client.Pipeline()
 	pipe.Set(key, string(jsonToken), -1)
 
-	//pipe.Append(key, string(jsonToken))
+	_, err := pipe.Exec()
+	return err
+}
+
+func (h PhAuthorizeHandler) PushValueByKeyAndExpire(key string, value interface{}, expiration time.Duration) error {
+	jsonToken, _ := json.Marshal(value)
+
+	client := h.rd.GetRedisClient()
+	defer client.Close()
+
+	pipe := client.Pipeline()
+	pipe.Set(key, string(jsonToken), expiration)
 
 	_, err := pipe.Exec()
 	return err
@@ -258,4 +322,17 @@ func (h PhAuthorizeHandler) RdDeleteToken(key string) {
 	pipe.Del(key)
 
 	pipe.Exec()
+}
+
+func makeScopeStr(scopeArr []PhModel.Scope) (scope string) {
+	if len(scopeArr) == 0 {
+		panic("scopeArr is empty")
+	}
+	scope = fmt.Sprint("APP/", scopeArr[0].Access, ":", scopeArr[0].Operation, "#", scopeArr[0].Expired)
+
+	for _, v := range scopeArr[1:] {
+		scope = fmt.Sprint(scope, ",", v.Access, ":", v.Operation, "#", v.Expired)
+	}
+
+	return
 }
