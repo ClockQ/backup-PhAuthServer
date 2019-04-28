@@ -1,13 +1,13 @@
 package PhFactory
 
 import (
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"github.com/PharbersDeveloper/PhAuthServer/PhDataStorage"
-	"github.com/PharbersDeveloper/PhAuthServer/PhResource"
-	"github.com/PharbersDeveloper/PhAuthServer/PhHandler"
+	"ph_auth/PhDataStorage"
+	"ph_auth/PhHandler"
+	"ph_auth/PhModel"
+	"ph_auth/PhResource"
 )
 
 type PhTable struct{}
@@ -25,17 +25,17 @@ var PhResourceFactory = map[string]interface{}{
 }
 
 var PhFunctionFactory = map[string]interface{}{
-	"PhCommonPanicHandle":      PhHandler.CommonPanicHandle{},
-	"PhLoginPageHandler":       PhHandler.PhLoginPageHandler{},
-	"PhAuthPageHandler":        PhHandler.PhAuthPageHandler{},
-	"PhAccountHandler":         PhHandler.PhAccountHandler{},
-	"PhTokenHandler":           PhHandler.PhTokenHandler{},
-	"PhTokenValidationHandler": PhHandler.PhTokenHandler{},
-	"PhAuthorizeHandler":       PhHandler.PhAuthorizeHandler{},
-	"PhUserAgentHandler":       PhHandler.PhUserAgentHandler{},
+	"PhCommonPanicHandle":          PhHandler.CommonPanicHandle{},
+	"PhLoginPageHandler":           PhHandler.PhLoginPageHandler{},
+	"PhAuthPageHandler":            PhHandler.PhAuthPageHandler{},
+	"PhAccountHandler":             PhHandler.PhAccountHandler{},
+	"PhTokenHandler":               PhHandler.PhTokenHandler{},
+	"PhTokenValidationHandler":     PhHandler.PhTokenHandler{},
+	"PhAuthorizeHandler":           PhHandler.PhAuthorizeHandler{},
+	"PhUserAgentHandler":           PhHandler.PhUserAgentHandler{},
 	"PhGenerateAccessTokenHandler": PhHandler.PhAuthorizeHandler{},
-	"PhRefreshAccessTokenHandler": PhHandler.PhAuthorizeHandler{},
-	"PhPasswordLoginHandler": PhHandler.PhAuthorizeHandler{},
+	"PhRefreshAccessTokenHandler":  PhHandler.PhAuthorizeHandler{},
+	"PhPasswordLoginHandler":       PhHandler.PhAuthorizeHandler{},
 }
 var PhMiddlewareFactory = map[string]interface{}{
 	//"NtmCheckTokenMiddleware": NtmMiddleware.NtmCheckTokenMiddleware{},

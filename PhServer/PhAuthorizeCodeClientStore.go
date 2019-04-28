@@ -2,12 +2,12 @@ package PhServer
 
 import (
 	"errors"
+	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
+	"github.com/alfredyang1986/BmServiceDef/BmModel"
+	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
-	"github.com/alfredyang1986/BmServiceDef/BmModel"
-	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
-	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
-	"gopkg.in/mgo.v2/bson"
+	"ph_auth/PhModel"
 )
 
 func NewAuthorizeCodeClientStore(mdb *BmMongodb.BmMongodb) *PhAuthorizeCodeClientStore {
@@ -24,7 +24,7 @@ type PhAuthorizeCodeClientStore struct {
 
 // GetByID according to the ID for the client information
 func (p *PhAuthorizeCodeClientStore) GetByID(id string) (cli oauth2.ClientInfo, err error) {
-	if !bson.IsObjectIdHex(id){
+	if !bson.IsObjectIdHex(id) {
 		err = errors.New(id + " isn't ObjectIdHex")
 		return
 	}
@@ -62,10 +62,9 @@ func (p *PhAuthorizeCodeClientStore) DelInfo(cli oauth2.ClientInfo) (err error) 
 
 func clientInfo2Model(cli oauth2.ClientInfo) (bmb BmModel.BmModelBase) {
 	bmb = &PhModel.Client{
-		ClientID:  	cli.GetID(),
-		Secret: 	cli.GetSecret(),
-		Domain: 	cli.GetDomain(),
-		AccountID: 	cli.GetUserID(),
+		ClientID:  cli.GetID(),
+		Secret:    cli.GetSecret(),
+		Domain:    cli.GetDomain(),
 	}
 	return
 }
@@ -76,7 +75,6 @@ func Model2ClientInfo(bmb BmModel.BmModelBase) (cli oauth2.ClientInfo) {
 		ID:     model.ClientID,
 		Secret: model.Secret,
 		Domain: model.Domain,
-		UserID: model.AccountID,
 	}
 	return
 }
