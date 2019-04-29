@@ -1,22 +1,15 @@
 package PhHandler
 
 import (
-	"fmt"
-	"github.com/julienschmidt/httprouter"
-	"gopkg.in/oauth2.v3/errors"
-	"gopkg.in/oauth2.v3/server"
-	"net/http"
-	"ph_auth/PhUnits/array"
-	"reflect"
-	"strconv"
-	"strings"
-
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"github.com/julienschmidt/httprouter"
+	"gopkg.in/oauth2.v3/server"
+	"net/http"
+	"reflect"
 
 	"encoding/json"
-	"ph_auth/PhModel"
 	"ph_auth/PhServer"
 	"time"
 )
@@ -76,48 +69,23 @@ func (h PhTokenHandler) Token(w http.ResponseWriter, r *http.Request, _ httprout
 
 func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	token, err := h.srv.ValidationBearerToken(r)
+
+	//TODO: 完善AuthServer的TokenValidation, 尽量保证通用性 !
+	data := make(map[string]interface{}, 0)
 	if err != nil {
-		panic(err.Error())
-	}
-
-	applyScope := token.GetScope()	// 申请Scope
-	detailScope := strings.Split(applyScope, "/")
-	//level := detailScope[0]       	// Pharbers 官网 App 单个系统
-	applyAccessOpt := detailScope[1] 	// 申请的项目及动作表述
-	fmt.Println(applyAccessOpt)
-
-	accessToken := token.GetAccess()
-	redisClient := h.rd.GetRedisClient()
-	tokenUUID, err := redisClient.Get(accessToken).Result()
-	if err != nil {
-		panic(err.Error())
-	}
-	initialToken, err := redisClient.Get(tokenUUID).Result()
-	if err != nil {
-		panic(err.Error())
-	}
-	var oauthPrototype map[string]interface{}
-	json.Unmarshal([]byte(initialToken), &oauthPrototype)
-
-	userScope := oauthPrototype["Scope"].(string)
-
-	accessed, accessOpt := checkAccessScope(applyAccessOpt, userScope)	//允许访问(判断是否有授权)
-	indate := checkIndateScope(accessOpt)	//有效期内(判断授权是否过期)
-	if accessed && indate {
-		data := map[string]interface{}{
-			"expires_in":         int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
-			"refresh_expires_in": token.GetRefreshExpiresIn(),
-			"client_id":          token.GetClientID(),
-			"user_id":            token.GetUserID(),
-			"auth_scope":         token.GetScope(),
-		}
-		e := json.NewEncoder(w)
-		e.SetIndent("", "  ")
-		e.Encode(data)
-		return 0
+		data["error"] = err.Error()
+		data["error_description"] = err.Error()
 	} else {
-		panic(errors.ErrInvalidScope.Error())
+		data["expires_in"] = int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds())
+		data["refresh_expires_in"] = token.GetRefreshExpiresIn()
+		data["client_id"] = token.GetClientID()
+		data["user_id"] = token.GetUserID()
+		data["auth_scope"] = token.GetScope()
 	}
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	e.Encode(data)
+	return 0
 }
 
 func (h PhTokenHandler) GetHttpMethod() string {
@@ -128,101 +96,3 @@ func (h PhTokenHandler) GetHandlerMethod() string {
 	return h.Method
 }
 
-func singleAppGetScope(accScope []PhModel.Scope, applyScopes []string, prefix, level string) (bool, string) {
-	var (
-		scope     string
-		scopeTemp map[string][]string
-		temp      []string
-	)
-	scopeTemp = make(map[string][]string)
-	for _, v := range accScope {
-		temp = append(temp, v.Access+":"+v.Operation)
-	}
-	for _, applyScope := range applyScopes {
-		if array.IsExistItem(prefix+":"+applyScope, temp) {
-			scopeTemp[prefix] = append(scopeTemp[prefix], applyScope)
-		} else {
-			return true, ""
-		}
-	}
-	body, _ := json.Marshal(scopeTemp)
-	scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"))
-	if scope != "" {
-		return false, scope + "|"
-	}
-	return true, ""
-
-}
-
-func scopeSplit(scope string) (string, []string) {
-	var (
-		detailScope []string
-		scopeSubStr string
-	)
-	detailScope = strings.Split(scope, ":")
-	prefix := detailScope[0]
-	if len(detailScope) == 2 {
-		scopeSubStr = strings.Trim(detailScope[1], "[]")
-		return prefix, strings.Split(scopeSubStr, ",")
-	}
-
-	return prefix, nil
-}
-
-func checkAccessScope(applyAccessOpt string, userScope string) (accessed bool, accessOpt string) {
-
-	accessed = false
-	applyAccess := strings.Split(applyAccessOpt, ":")[0]
-	userAccessOpts := strings.Split(userScope, "/")[1]
-	userAccessOptArr := strings.Split(userAccessOpts, ",")
-	for _, userAccessOpt := range userAccessOptArr {
-		userAccess := strings.Split(userAccessOpt, ":")[0]
-		if userAccess == applyAccess {
-			//TODO:目前只是检查有无访问项目的权限，还未进行具体操作权限的check => func checkOperationScope(operationCmd string) (allowed bool) {}
-			accessed = true
-			accessOpt = userAccessOpt
-			return
-		}
-	}
-	accessOpt = applyAccessOpt
-	return
-}
-
-func checkIndateScope(accessOpt string) (indate bool) {
-
-	indate = false
-	accessOptArr := strings.Split(accessOpt, ":")
-	if len(accessOptArr) < 2 { //项目名+操作
-		return
-	}
-	operation := accessOptArr[1]
-	optExpArr := strings.Split(operation, "#")
-	if len(optExpArr) < 3 {	//操作范围+具体操作+过期时间
-		return
-	}
-	expired, err := strconv.ParseFloat(optExpArr[2], 64)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	now := float64(time.Now().UnixNano() / 1e6)
-	if expired > now {
-		indate = true
-		return
-	}
-	return
-}
-
-func checkOperationScope(operationCmd string) (allowed bool) {
-
-	allowed = false
-	operationCmdArr := strings.Split(operationCmd, "")
-	if len(operationCmdArr) != 3 {
-		panic("Scope OperationCmd Error!")
-	}
-	//TODO:针对不同情况验证权限[还需要再想想]
-	if operationCmdArr[2] == "x" {
-		allowed = true
-	}
-	return
-}
