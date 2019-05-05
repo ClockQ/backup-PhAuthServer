@@ -222,9 +222,7 @@ func checkAccessScope(applyAccess string, accScopes []PhModel.Scope) (accessed b
 	for _, v := range accScopes {
 		if v.Access == applyAccess {
 			accessed = true
-			//TODO:讨论是否返回具体操作权限"rwx"?暂时没返回
-			operation := strings.Split(v.Operation, "#")[0]
-			scope = fmt.Sprint(v.Access, ":", operation)
+			scope = fmt.Sprint(v.Access, ":", v.Operation, "#", v.Expired)
 			return
 		}
 	}
