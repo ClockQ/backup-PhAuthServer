@@ -1,22 +1,73 @@
 models:
 - PhAccount
+- PhEmployee
+- PhGroup
+- PhCompany
+- PhRole
 
 storages:
 - name: PhAccountStorage
-  method: NewAccountStorage
+  method: NewStorage
+  daemons:
+  - BmMongodbDaemon
+- name: PhEmployeeStroage
+  method: NewStorage
+  daemons:
+  - BmMongodbDaemon
+- name: PhGroupStroage
+  method: NewStorage
+  daemons:
+  - BmMongodbDaemon
+- name: PhCompanyStroage
+  method: NewStorage
+  daemons:
+  - BmMongodbDaemon
+- name: PhRoleStroage
+  method: NewStorage
   daemons:
   - BmMongodbDaemon
 
 resources:
 - name: PhAccountResource
-  method: NewAccountResource
+  method: NewResource
   storages:
   - PhAccountStorage
+  - PhEmployeeStroage
+  - PhRoleStroage
+- name: PhEmployeeResource
+  method: NewResource
+  storages:
+  - PhEmployeeStroage
+  - PhGroupStroage
+- name: PhGroupResource
+  method: NewResource
+  storages:
+  - PhEmployeeStroage
+  - PhGroupStroage
+  - PhCompanyStroage
+- name: PhCompanyResource
+  method: NewResource
+  storages:
+  - PhGroupStroage
+  - PhCompanyStroage
+- name: PhRoleResource
+  method: NewResource
+  storages:
+  - PhRoleStroage
 
 services:
-#- name: ph-account
-#  model: PhAccount
-#  resource: PhAccountResource
+- name: ph-account
+  model: PhAccount
+  resource: PhAccountResource
+- name: ph-employee
+  model: PhEmployee
+  resource: PhEmployeeResource
+- name: ph-group
+  model: PhGroup
+  resource: PhGroupResource
+- name: ph-company
+  model: PhCompany
+  resource: PhCompanyResource
 
 functions:
 - name: PhLoginPageHandler
@@ -97,12 +148,13 @@ functions:
 
 
 middlewares:
-#- name: NtmCheckTokenMiddleware
-#  create: NewCheckTokenMiddleware
-#  daemons:
-#  - BmRedisDaemon
-#  args:
-#  - name
+- name: PhCheckTokenMiddleware
+  create: NewCheckTokenMiddleware
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  args:
+  - name
 
 panic:
   name: PhCommonPanicHandle

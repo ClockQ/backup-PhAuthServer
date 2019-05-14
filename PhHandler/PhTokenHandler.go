@@ -69,6 +69,9 @@ func (h PhTokenHandler) Token(w http.ResponseWriter, r *http.Request, _ httprout
 
 func (h PhTokenHandler) TokenValidation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	token, err := h.srv.ValidationBearerToken(r)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	//TODO: 完善AuthServer的TokenValidation, 尽量保证通用性 !
 	data := make(map[string]interface{}, 0)

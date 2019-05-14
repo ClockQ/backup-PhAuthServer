@@ -3,6 +3,7 @@ package PhFactory
 import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
+	"ph_auth/PhMiddleware"
 
 	"ph_auth/PhDataStorage"
 	"ph_auth/PhHandler"
@@ -14,14 +15,26 @@ type PhTable struct{}
 
 var PhModelFactory = map[string]interface{}{
 	"PhAccount": PhModel.Account{},
+	"PhEmployee": PhModel.Employee{},
+	"PhGroup": PhModel.Group{},
+	"PhCompany": PhModel.Company{},
+	"PhRole": PhModel.Role{},
 }
 
 var PhStorageFactory = map[string]interface{}{
 	"PhAccountStorage": PhDataStorage.PhAccountStorage{},
+	"PhEmployeeStroage": PhDataStorage.PhEmployeeStroage{},
+	"PhGroupStroage": PhDataStorage.PhGroupStroage{},
+	"PhCompanyStroage": PhDataStorage.PhCompanyStroage{},
+	"PhRoleStroage": PhDataStorage.PhRoleStroage{},
 }
 
 var PhResourceFactory = map[string]interface{}{
 	"PhAccountResource": PhResource.PhAccountResource{},
+	"PhEmployeeResource": PhResource.PhEmployeeResource{},
+	"PhGroupResource": PhResource.PhGroupResource{},
+	"PhCompanyResource": PhResource.PhCompanyResource{},
+	"PhRoleResource": PhResource.PhRoleResource{},
 }
 
 var PhFunctionFactory = map[string]interface{}{
@@ -38,7 +51,7 @@ var PhFunctionFactory = map[string]interface{}{
 	"PhPasswordLoginHandler":       PhHandler.PhAuthorizeHandler{},
 }
 var PhMiddlewareFactory = map[string]interface{}{
-	//"NtmCheckTokenMiddleware": NtmMiddleware.NtmCheckTokenMiddleware{},
+	"PhCheckTokenMiddleware": PhMiddleware.PhCheckTokenMiddleware{},
 }
 
 var PhDaemonFactory = map[string]interface{}{

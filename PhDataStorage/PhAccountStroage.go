@@ -16,7 +16,7 @@ type PhAccountStorage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s PhAccountStorage) NewAccountStorage(args []BmDaemons.BmDaemon) *PhAccountStorage {
+func (s PhAccountStorage) NewStorage(args []BmDaemons.BmDaemon) *PhAccountStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
 	return &PhAccountStorage{db: mdb}
 }
