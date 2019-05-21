@@ -25,7 +25,7 @@ require (
 	github.com/alfredyang1986/blackmirror v0.0.0-20190305121812-d8d7643fb552 // indirect
 	github.com/gavv/httpexpect v1.0.0 // indirect
 	github.com/gedex/inflector v0.0.0-20170307190818-16278e9db813 // indirect
-	github.com/go-redis/redis v6.15.2+incompatible // indirect
+	github.com/go-redis/redis v6.15.2+incompatible
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/manyminds/api2go v0.0.0-20190324173508-d4f7fae65b4b
 	github.com/rs/cors v1.6.0

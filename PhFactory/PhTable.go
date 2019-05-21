@@ -19,6 +19,7 @@ var PhModelFactory = map[string]interface{}{
 	"PhGroup": PhModel.Group{},
 	"PhCompany": PhModel.Company{},
 	"PhRole": PhModel.Role{},
+	"PhApplyuser": PhModel.Applyuser{},
 }
 
 var PhStorageFactory = map[string]interface{}{
@@ -27,6 +28,7 @@ var PhStorageFactory = map[string]interface{}{
 	"PhGroupStroage": PhDataStorage.PhGroupStroage{},
 	"PhCompanyStroage": PhDataStorage.PhCompanyStroage{},
 	"PhRoleStroage": PhDataStorage.PhRoleStroage{},
+	"PhApplyuserStorage": PhDataStorage.PhApplyuserStorage{},
 }
 
 var PhResourceFactory = map[string]interface{}{
@@ -35,6 +37,7 @@ var PhResourceFactory = map[string]interface{}{
 	"PhGroupResource": PhResource.PhGroupResource{},
 	"PhCompanyResource": PhResource.PhCompanyResource{},
 	"PhRoleResource": PhResource.PhRoleResource{},
+	"PhApplyuserResource": PhResource.PhApplyuserResource{},
 }
 
 var PhFunctionFactory = map[string]interface{}{
@@ -49,6 +52,10 @@ var PhFunctionFactory = map[string]interface{}{
 	"PhGenerateAccessTokenHandler": PhHandler.PhAuthorizeHandler{},
 	"PhRefreshAccessTokenHandler":  PhHandler.PhAuthorizeHandler{},
 	"PhPasswordLoginHandler":       PhHandler.PhAuthorizeHandler{},
+	"PhForgetPasswordHandler": 		PhHandler.PhAccountHandler{},
+	"PhVerifyUUIDHandler": 			PhHandler.PhAccountHandler{},
+	"PhUpdatePasswordHandler": 		PhHandler.PhAccountHandler{},
+
 }
 var PhMiddlewareFactory = map[string]interface{}{
 	"PhCheckTokenMiddleware": PhMiddleware.PhCheckTokenMiddleware{},

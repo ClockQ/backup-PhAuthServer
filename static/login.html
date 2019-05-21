@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
@@ -27,29 +27,44 @@
             <input style="height: 48px" type="text" class="form-control mb-2" name="username" id="username" placeholder="用户名">
             <label for="inputPassword" class="sr-only">Password</label>
             <input style="height: 48px"  type="password" class="form-control mb-3" name="password" id="password" placeholder="密码">
-            <button style="height: 48px" id="authSubmit"   class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
+            <button style="height: 48px" id="authSubmit"   class="btn btn-lg btn-primary btn-block" type="button">登录</button>
         </form>
     </div>
 </body>
 
 <script type="text/javascript" >
-      document.getElementById("authSubmit").addEventListener('click', function(){
-        var xhttp;
-        xhttp=new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                window.location = this.response
-            }
-        };
+    //   document.getElementById("authSubmit").addEventListener('click', function(){
+    //     var xhttp;
+    //     xhttp=new XMLHttpRequest();
+    //     xhttp.onreadystatechange = function() {
+    //         if (this.readyState == 4 && this.status == 200) {
+    //             window.console.info(this.response)
+    //             // window.location = this.response
+    //             alert(123)
+    //         }
+    //     };
+    //
+    //     // xhttp.open("POST", `http://oauth.pharbers.com/v0/AccountValidation${decodeURI($('#parameter').val())}`, true);
+    //     xhttp.open("POST", `http://192.168.100.116:9096/v0/AccountValidation${decodeURI($('#parameter').val())}`, true);
+    //
+    //     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    //     xhttp.send(`username=${document.getElementById("username").value}&password=${document.getElementById("password").value}`);
+    //
+    // }, false);
 
-        xhttp.open("POST", `http://oauth.pharbers.com/v0/AccountValidation${decodeURI($('#parameter').val())}`, true);
-        // xhttp.open("POST", `http://192.168.100.174:9096/v0/AccountValidation${decodeURI($('#parameter').val())}`, true);
-
-        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhttp.send(`username=${document.getElementById("username").value}&password=${document.getElementById("password").value}`);
-
-    }, false);
-
+    $(function(){
+        var url = `http://oauth.pharbers.com/v0/AccountValidation${decodeURI($('#parameter').val())}`;
+        // var url = `http://192.168.100.116:9096/v0/AccountValidation${decodeURI($('#parameter').val())}`;
+        $('#authSubmit').click(function() {
+            $.post(url, {username: $('#username').val(), password: $('#password').val()}, function(r){
+                if(typeof r.error !== 'undefined') {
+                    alert(r.error_description);
+                    return
+                }
+               window.location = r;
+            })
+        });
+    });
 
 </script>
 </html>

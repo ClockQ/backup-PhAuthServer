@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"ph_auth/PhServer"
 	"reflect"
+	"strings"
 )
 
 var PhCheckToken PhCheckTokenMiddleware
@@ -50,8 +51,11 @@ func (ctm PhCheckTokenMiddleware) NewCheckTokenMiddleware(args ...interface{}) P
 }
 
 func (ctm PhCheckTokenMiddleware) DoMiddleware(c api2go.APIContexter, w http.ResponseWriter, r *http.Request) {
-	if err := ctm.CheckTokenFormFunction(w, r); err != nil {
-		panic(err.Error())
+	// 垃圾的一批
+	if !strings.Contains(r.RequestURI, "applyusers") {
+		if err := ctm.CheckTokenFormFunction(w, r); err != nil {
+			panic(err.Error())
+		}
 	}
 }
 
