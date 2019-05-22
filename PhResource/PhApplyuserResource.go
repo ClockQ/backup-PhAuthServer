@@ -114,11 +114,11 @@ func (s PhApplyuserResource) Create(obj interface{}, r api2go.Request) (api2go.R
 		return &Response{}, api2go.NewHTTPError(errors.New("Invalid instance given"), "Invalid instance given", http.StatusBadRequest)
 	}
 
-	r.QueryParams["email"] = []string{model.Email}
-	result := s.PhApplyuserStorage.GetAll(r, -1,-1)
-	if len(result) > 0 {
-		panic("邮箱已存在")
-	}
+	//r.QueryParams["email"] = []string{model.Email}
+	//result := s.PhApplyuserStorage.GetAll(r, -1,-1)
+	//if len(result) > 0 {
+	//	panic("邮箱已存在")
+	//}
 
 	id := s.PhApplyuserStorage.Insert(model)
 	model.ID = id
