@@ -5,7 +5,7 @@ FROM    golang:1.12.4-alpine
 RUN     apk add --no-cache git gcc musl-dev
 
 #LABEL 更改version后，本地build时LABEL以上的Steps使用Cache
-LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.11"
+LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.12"
 
 # 设置工程配置文件的环境变量 && 开启go-module
 ENV     PH_AUTH_HOME $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer/resources
