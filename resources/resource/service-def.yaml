@@ -167,6 +167,7 @@ functions:
   http: POST
   args:
   - v0
+#  - 127.0.0.1:60106
   - mail:60106
   - SendMail
   - http://www.pharbers.com

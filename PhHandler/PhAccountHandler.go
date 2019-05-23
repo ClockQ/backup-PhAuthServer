@@ -166,9 +166,8 @@ func (h PhAccountHandler) ForgetPassword(w http.ResponseWriter, r *http.Request,
 		"content": "<a href=`+ url +`>点击修改密码</a>",
 		"content-type": "text/html; charset=UTF-8"}`)
 
-	_, err = h.sendEmail(r, content)
+	h.sendEmail(r, content)
 
-	fmt.Println(err)
 
 	response["status"] = "success"
 	response["msg"] = "Email已发送"
@@ -306,7 +305,7 @@ func (h PhAccountHandler) GetHandlerMethod() string {
 	return h.Method
 }
 
-func (h PhAccountHandler) sendEmail(r *http.Request, content []byte)  (*http.Response, error) {
+func (h PhAccountHandler) sendEmail(r *http.Request, content []byte) {
 	// 拼接转发的URL
 	scheme := "http://"
 	if r.TLS != nil {
@@ -326,7 +325,6 @@ func (h PhAccountHandler) sendEmail(r *http.Request, content []byte)  (*http.Res
 		req.Header.Add(k, v[0])
 	}
 
-	mailResponse, err := client.Do(req)
+	client.Do(req)
 
-	return mailResponse, err
 }
