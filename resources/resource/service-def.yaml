@@ -211,6 +211,8 @@ daemons:
   args:
     host: primary
     port: 27017
+    user: pharbers
+    pass: pharbers2019
     database: pharbers-auth-server
 #    host: 127.0.0.1
 #    port: 27017
@@ -222,5 +224,5 @@ daemons:
     port: 6379
 #    host: 127.0.0.1
 #    port: 6379
-    password:
+    password: pharbers
     database: 0
