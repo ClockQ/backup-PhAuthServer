@@ -161,10 +161,11 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 // 设置AccessToken过期时间
 func accessTokenExpHandler () (handler func(w http.ResponseWriter, r *http.Request)(exp time.Duration, err error))  {
 	handler = func(w http.ResponseWriter, r *http.Request) (exp time.Duration, err error) {
-		h, _ := time.ParseDuration("8h")
-		return h, nil
+		h, err := time.ParseDuration("8h")
+		fmt.Println("8h延长")
+		return h, err
 	}
-	return
+	return handler
 }
 
 func checkAccessScope(applyAccess string, accScopes []PhModel.Scope) (accessed bool, scope string) {
