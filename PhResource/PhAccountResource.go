@@ -13,18 +13,28 @@ import (
 
 type PhAccountResource struct {
 	PhAccountStorage *PhDataStorage.PhAccountStorage
+	PhEmployeeStroage *PhDataStorage.PhEmployeeStroage
+	PhRoleStroage *PhDataStorage.PhRoleStroage
 }
 
-func (c PhAccountResource) NewAccountResource(args []BmDataStorage.BmStorage) *PhAccountResource {
+func (c PhAccountResource) NewResource(args []BmDataStorage.BmStorage) *PhAccountResource {
 	var cs *PhDataStorage.PhAccountStorage
+	var es *PhDataStorage.PhEmployeeStroage
+	var rs *PhDataStorage.PhRoleStroage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "PhAccountStorage" {
 			cs = arg.(*PhDataStorage.PhAccountStorage)
+		} else if tp.Name() == "PhEmployeeStroage" {
+			es = arg.(*PhDataStorage.PhEmployeeStroage)
+		} else if tp.Name() == "PhRoleStroage" {
+			rs = arg.(*PhDataStorage.PhRoleStroage)
 		}
 	}
 	return &PhAccountResource{
 		PhAccountStorage: cs,
+		PhEmployeeStroage: es,
+		PhRoleStroage: rs,
 	}
 }
 
@@ -37,8 +47,28 @@ func (c PhAccountResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 
 // FindOne account
 func (c PhAccountResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	res, err := c.PhAccountStorage.GetOne(ID)
-	return &Response{Res: res}, err
+	model, err := c.PhAccountStorage.GetOne(ID)
+	if err != nil {
+		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
+	}
+
+	if model.EmployeeID != "" {
+		e, err := c.PhEmployeeStroage.GetOne(model.EmployeeID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Employee = &e
+	}
+
+	if model.RoleID != "" {
+		role, err := c.PhRoleStroage.GetOne(model.RoleID)
+		if err != nil {
+			return &Response{}, err
+		}
+		model.Role = &role
+	}
+
+	return &Response{Res: model}, err
 }
 
 // Create a new account
