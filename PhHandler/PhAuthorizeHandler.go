@@ -102,7 +102,8 @@ func (h PhAuthorizeHandler) GenerateAccessToken(w http.ResponseWriter, r *http.R
 	phToken.TokenType = accessToken.TokenType
 
 	// 存入Redis RefreshToken
-	err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
+	//err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
+	err = h.PushValueByKeyAndExpire(fmt.Sprint("RefreshToken_", phToken.RefreshToken), &phToken, time.Hour * 12)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 1
@@ -163,7 +164,8 @@ func (h PhAuthorizeHandler) RefreshAccessToken(w http.ResponseWriter, r *http.Re
 	}
 
 	// 存入Redis RefreshToken
-	err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
+	//err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
+	err = h.PushValueByKeyAndExpire(fmt.Sprint("RefreshToken_", phToken.RefreshToken), &phToken, time.Hour * 12)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 1
@@ -251,7 +253,8 @@ func (h PhAuthorizeHandler) PasswordLogin(w http.ResponseWriter, r *http.Request
 	phToken.TokenType = token.TokenType
 
 	// 存入Redis RefreshToken
-	err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
+	//err = h.PushValueByKey("RefreshToken_"+phToken.RefreshToken, &phToken)
+	err = h.PushValueByKeyAndExpire(fmt.Sprint("RefreshToken_", phToken.RefreshToken), &phToken, time.Hour * 12)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return 1
@@ -273,19 +276,6 @@ func (h PhAuthorizeHandler) GetHttpMethod() string {
 
 func (h PhAuthorizeHandler) GetHandlerMethod() string {
 	return h.Method
-}
-
-func (h PhAuthorizeHandler) PushValueByKey(key string, value interface{}) error {
-	jsonToken, _ := json.Marshal(value)
-
-	client := h.rd.GetRedisClient()
-	defer client.Close()
-
-	pipe := client.Pipeline()
-	pipe.Set(key, string(jsonToken), -1)
-
-	_, err := pipe.Exec()
-	return err
 }
 
 func (h PhAuthorizeHandler) PushValueByKeyAndExpire(key string, value interface{}, expiration time.Duration) error {
