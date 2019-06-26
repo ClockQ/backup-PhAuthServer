@@ -37,6 +37,7 @@ func NewAuthorizeCodeServer(manager oauth2.Manager, mdb *BmMongodb.BmMongodb, rd
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler(rdb))
 	srv.SetPasswordAuthorizationHandler(passwordAuthorizationHandler(mdb))
 	srv.SetAuthorizeScopeHandler(authorizeScopeHandler(mdb))
+	srv.SetAccessTokenExpHandler(accessTokenExpHandler())
 	return
 }
 
@@ -157,64 +158,14 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 	return
 }
 
-//func topLevelGetScope(accScope []PhModel.Scope, level, prefix string) string {
-//	var (
-//		scope     string
-//		scopeTemp map[string][]string
-//	)
-//	scopeTemp = make(map[string][]string)
-//
-//	for _, s := range accScope {
-//		if s.Access == prefix {
-//			scopeTemp[prefix] = append(scopeTemp[prefix], s.Operation)
-//		}
-//	}
-//
-//	body, _ := json.Marshal(scopeTemp)
-//	scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"), "|")
-//	return scope
-//}
-//
-//func singleAppGetScope(accScope []PhModel.Scope, applyScopes []string, prefix, level string) (bool, string) {
-//	var (
-//		scope     string
-//		scopeTemp map[string][]string
-//		temp      []string
-//	)
-//	scopeTemp = make(map[string][]string)
-//	for _, v := range accScope {
-//		temp = append(temp, v.Access+":"+v.Operation)
-//	}
-//	for _, applyScope := range applyScopes {
-//		if array.IsExistItem(prefix+":"+applyScope, temp) {
-//			scopeTemp[prefix] = append(scopeTemp[prefix], applyScope)
-//		} else {
-//			return true, ""
-//		}
-//	}
-//	body, _ := json.Marshal(scopeTemp)
-//	scope = fmt.Sprint(level, "/", strings.Trim(strings.ReplaceAll(string(body), `"`, ""), "{}"))
-//	if scope != "" {
-//		return false, scope + "|"
-//	}
-//	return true, ""
-//
-//}
-//
-//func scopeSplit(scope string) (string, []string) {
-//	var (
-//		detailScope []string
-//		scopeSubStr string
-//	)
-//	detailScope = strings.Split(scope, ":")
-//	prefix := detailScope[0]
-//	if len(detailScope) == 2 {
-//		scopeSubStr = strings.Trim(detailScope[1], "[]")
-//		return prefix, strings.Split(scopeSubStr, ",")
-//	}
-//
-//	return prefix, nil
-//}
+// 设置AccessToken过期时间
+func accessTokenExpHandler () (handler func(w http.ResponseWriter, r *http.Request)(exp time.Duration, err error))  {
+	handler = func(w http.ResponseWriter, r *http.Request) (exp time.Duration, err error) {
+		h, _ := time.ParseDuration("8h")
+		return h, nil
+	}
+	return
+}
 
 func checkAccessScope(applyAccess string, accScopes []PhModel.Scope) (accessed bool, scope string) {
 
