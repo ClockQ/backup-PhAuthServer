@@ -161,9 +161,9 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 // 设置AccessToken过期时间
 func accessTokenExpHandler () (handler func(w http.ResponseWriter, r *http.Request)(exp time.Duration, err error))  {
 	handler = func(w http.ResponseWriter, r *http.Request) (exp time.Duration, err error) {
-		h, err := time.ParseDuration("8h")
-		fmt.Println("8h延长")
-		return h, err
+		h := time.Hour * 8
+		fmt.Println(h.Minutes())
+		return h, nil
 	}
 	return handler
 }
