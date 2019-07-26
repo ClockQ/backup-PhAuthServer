@@ -95,8 +95,8 @@ functions:
   args:
   - Auth
   - Authorize
-  - http://192.168.100.116:9096
-#  - http://oauth.pharbers.com
+#  - http://192.168.100.116:9096
+  - http://oauth.pharbers.com
 - name: PhTokenHandler
   create: NewTokenHandler
   daemons:
@@ -158,7 +158,6 @@ functions:
   http: POST
   args:
   - v0
-#  - 127.0.0.1:60106
   - mail:60106
   - SendMail
   - http://www.pharbers.com
@@ -200,20 +199,20 @@ daemons:
 - name: BmMongodbDaemon
   method: NewMongoDBDaemon
   args:
-#    host: primary
-#    port: 27017
+    host: primary
+    port: 27017
 #    user: pharbers
 #    pass: pharbers2019
     database: pharbers-auth-server
-    host: 127.0.0.1
-    port: 27017
+#    host: 127.0.0.1
+#    port: 27017
 #    database: pharbers-auth-server
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
-#    host: redis
-#    port: 6379
-    host: 127.0.0.1
+    host: redis
     port: 6379
+#    host: 127.0.0.1
+#    port: 6379
     password:
     database: 0

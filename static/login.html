@@ -53,8 +53,8 @@
     // }, false);
 
     $(function(){
-        // var url = `http://oauth.pharbers.com/v0/AccountValidation${decodeURI($('#parameter').val())}`;
-        var url = `http://192.168.100.116:9096/v0/AccountValidation${decodeURI($('#parameter').val())}`;
+        var url = `http://oauth.pharbers.com/v0/AccountValidation${decodeURI($('#parameter').val())}`;
+        // var url = `http://192.168.100.116:9096/v0/AccountValidation${decodeURI($('#parameter').val())}`;
         $('#authSubmit').click(function() {
             $.post(url, {username: $('#username').val(), password: $('#password').val()}, function(r){
                 if(typeof r.error !== 'undefined') {
