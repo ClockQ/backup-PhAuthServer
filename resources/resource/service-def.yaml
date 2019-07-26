@@ -4,31 +4,26 @@ models:
 - PhGroup
 - PhCompany
 - PhRole
-- PhApplyuser
 
 storages:
 - name: PhAccountStorage
   method: NewStorage
   daemons:
   - BmMongodbDaemon
-- name: PhEmployeeStroage
+- name: PhEmployeeStorage
   method: NewStorage
   daemons:
   - BmMongodbDaemon
-- name: PhGroupStroage
+- name: PhGroupStorage
   method: NewStorage
   daemons:
   - BmMongodbDaemon
-- name: PhCompanyStroage
+- name: PhCompanyStorage
   method: NewStorage
   daemons:
   - BmMongodbDaemon
-- name: PhRoleStroage
+- name: PhRoleStorage
   method: NewStorage
-  daemons:
-  - BmMongodbDaemon
-- name: PhApplyuserStorage
-  method: NewApplyuserStorage
   daemons:
   - BmMongodbDaemon
 
@@ -37,32 +32,28 @@ resources:
   method: NewResource
   storages:
   - PhAccountStorage
-  - PhEmployeeStroage
-  - PhRoleStroage
+  - PhEmployeeStorage
+  - PhRoleStorage
 - name: PhEmployeeResource
   method: NewResource
   storages:
-  - PhEmployeeStroage
-  - PhGroupStroage
+  - PhEmployeeStorage
+  - PhGroupStorage
 - name: PhGroupResource
   method: NewResource
   storages:
-  - PhEmployeeStroage
-  - PhGroupStroage
-  - PhCompanyStroage
+  - PhEmployeeStorage
+  - PhGroupStorage
+  - PhCompanyStorage
 - name: PhCompanyResource
   method: NewResource
   storages:
-  - PhGroupStroage
-  - PhCompanyStroage
+  - PhGroupStorage
+  - PhCompanyStorage
 - name: PhRoleResource
   method: NewResource
   storages:
-  - PhRoleStroage
-- name: PhApplyuserResource
-  method: NewApplyuserResource
-  storages:
-  - PhApplyuserStorage
+  - PhRoleStorage
 
 services:
 - name: ph-account
@@ -77,9 +68,6 @@ services:
 - name: ph-company
   model: PhCompany
   resource: PhCompanyResource
-- name: ph-applyuser
-  model: PhApplyuser
-  resource: PhApplyuserResource
 - name: ph-role
   model: PhRole
   resource: PhRoleResource

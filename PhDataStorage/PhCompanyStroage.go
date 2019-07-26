@@ -10,19 +10,19 @@ import (
 	"ph_auth/PhModel"
 )
 
-// PhCompanyStroage stores all of the tasty modelleaf, needs to be injected into
+// PhCompanyStorage stores all of the tasty modelleaf, needs to be injected into
 // Company and Company Resource. In the real world, you would use a database for that.
-type PhCompanyStroage struct {
+type PhCompanyStorage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s PhCompanyStroage) NewStorage(args []BmDaemons.BmDaemon) *PhCompanyStroage {
+func (s PhCompanyStorage) NewStorage(args []BmDaemons.BmDaemon) *PhCompanyStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &PhCompanyStroage{db: mdb}
+	return &PhCompanyStorage{db: mdb}
 }
 
 // GetAll of the modelleaf
-func (s PhCompanyStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.Company {
+func (s PhCompanyStorage) GetAll(r api2go.Request, skip int, take int) []PhModel.Company {
 	in := PhModel.Company{}
 	var out []PhModel.Company
 	err := s.db.FindMulti(r, &in, &out, skip, take)
@@ -38,7 +38,7 @@ func (s PhCompanyStroage) GetAll(r api2go.Request, skip int, take int) []PhModel
 }
 
 // GetOne tasty modelleaf
-func (s PhCompanyStroage) GetOne(id string) (PhModel.Company, error) {
+func (s PhCompanyStorage) GetOne(id string) (PhModel.Company, error) {
 	in := PhModel.Company{ID: id}
 	out := PhModel.Company{ID: id}
 	err := s.db.FindOne(&in, &out)
@@ -50,7 +50,7 @@ func (s PhCompanyStroage) GetOne(id string) (PhModel.Company, error) {
 }
 
 // Insert a fresh one
-func (s *PhCompanyStroage) Insert(c PhModel.Company) string {
+func (s *PhCompanyStorage) Insert(c PhModel.Company) string {
 	tmp, err := s.db.InsertBmObject(&c)
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +60,7 @@ func (s *PhCompanyStroage) Insert(c PhModel.Company) string {
 }
 
 // Delete one :(
-func (s *PhCompanyStroage) Delete(id string) error {
+func (s *PhCompanyStorage) Delete(id string) error {
 	in := PhModel.Company{ID: id}
 	err := s.db.Delete(&in)
 	if err != nil {
@@ -71,7 +71,7 @@ func (s *PhCompanyStroage) Delete(id string) error {
 }
 
 // Update updates an existing modelleaf
-func (s *PhCompanyStroage) Update(c PhModel.Company) error {
+func (s *PhCompanyStorage) Update(c PhModel.Company) error {
 	err := s.db.Update(&c)
 	if err != nil {
 		return fmt.Errorf("Company with id does not exist")

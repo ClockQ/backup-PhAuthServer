@@ -12,24 +12,24 @@ import (
 )
 
 type PhCompanyResource struct {
-	PhGroupStroage *PhDataStorage.PhGroupStroage
-	PhCompanyStroage *PhDataStorage.PhCompanyStroage
+	PhGroupStorage *PhDataStorage.PhGroupStorage
+	PhCompanyStorage *PhDataStorage.PhCompanyStorage
 }
 
 func (c PhCompanyResource) NewResource(args []BmDataStorage.BmStorage) *PhCompanyResource {
-	var cs *PhDataStorage.PhCompanyStroage
-	var gs *PhDataStorage.PhGroupStroage
+	var cs *PhDataStorage.PhCompanyStorage
+	var gs *PhDataStorage.PhGroupStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
-		if tp.Name() == "PhCompanyStroage" {
-			cs = arg.(*PhDataStorage.PhCompanyStroage)
-		} else if tp.Name() == "PhGroupStroage" {
-			gs = arg.(*PhDataStorage.PhGroupStroage)
+		if tp.Name() == "PhCompanyStorage" {
+			cs = arg.(*PhDataStorage.PhCompanyStorage)
+		} else if tp.Name() == "PhGroupStorage" {
+			gs = arg.(*PhDataStorage.PhGroupStorage)
 		}
 	}
 	return &PhCompanyResource{
-		PhCompanyStroage: cs,
-		PhGroupStroage: gs,
+		PhCompanyStorage: cs,
+		PhGroupStorage: gs,
 	}
 }
 
@@ -39,13 +39,13 @@ func (c PhCompanyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	groupsID, ok := r.QueryParams["groupsID"]
 	if ok {
 		modelRootID := groupsID[0]
-		modelRoot, err := c.PhGroupStroage.GetOne(modelRootID)
+		modelRoot, err := c.PhGroupStorage.GetOne(modelRootID)
 		if err != nil {
 			return &Response{}, err
 		}
 		modelID := modelRoot.CompanyID
 		if modelID != "" {
-			model, err := c.PhCompanyStroage.GetOne(modelID)
+			model, err := c.PhCompanyStorage.GetOne(modelID)
 			if err != nil {
 				return &Response{}, err
 			}
@@ -56,13 +56,13 @@ func (c PhCompanyResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	}
 
 	var result []PhModel.Company
-	result = c.PhCompanyStroage.GetAll(r, -1, -1)
+	result = c.PhCompanyStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 
 // FindOne account
 func (c PhCompanyResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	res, err := c.PhCompanyStroage.GetOne(ID)
+	res, err := c.PhCompanyStorage.GetOne(ID)
 	return &Response{Res: res}, err
 }
 
@@ -77,14 +77,14 @@ func (c PhCompanyResource) Create(obj interface{}, r api2go.Request) (api2go.Res
 		)
 	}
 
-	id := c.PhCompanyStroage.Insert(account)
+	id := c.PhCompanyStorage.Insert(account)
 	account.ID = id
 	return &Response{Res: account, Code: http.StatusCreated}, nil
 }
 
 // Delete a account :(
 func (c PhCompanyResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.PhCompanyStroage.Delete(id)
+	err := c.PhCompanyStorage.Delete(id)
 	return &Response{Code: http.StatusOK}, err
 }
 
@@ -99,6 +99,6 @@ func (c PhCompanyResource) Update(obj interface{}, r api2go.Request) (api2go.Res
 		)
 	}
 
-	err := c.PhCompanyStroage.Update(account)
+	err := c.PhCompanyStorage.Update(account)
 	return &Response{Res: account, Code: http.StatusNoContent}, err
 }

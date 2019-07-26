@@ -12,44 +12,64 @@ import (
 )
 
 type PhEmployeeResource struct {
-	PhEmployeeStroage *PhDataStorage.PhEmployeeStroage
-	PhGroupStroage *PhDataStorage.PhGroupStroage
+	PhEmployeeStorage 	*PhDataStorage.PhEmployeeStorage
+	PhGroupStorage 		*PhDataStorage.PhGroupStorage
+	PhAccountStorage 	*PhDataStorage.PhAccountStorage
 }
 
 func (c PhEmployeeResource) NewResource(args []BmDataStorage.BmStorage) *PhEmployeeResource {
-	var cs *PhDataStorage.PhEmployeeStroage
-	var gs *PhDataStorage.PhGroupStroage
+	var cs *PhDataStorage.PhEmployeeStorage
+	var gs *PhDataStorage.PhGroupStorage
+	var ac *PhDataStorage.PhAccountStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
-		if tp.Name() == "PhEmployeeStroage" {
-			cs = arg.(*PhDataStorage.PhEmployeeStroage)
-		} else if tp.Name() == "PhGroupStroage" {
-			gs = arg.(*PhDataStorage.PhGroupStroage)
+		if tp.Name() == "PhEmployeeStorage" {
+			cs = arg.(*PhDataStorage.PhEmployeeStorage)
+		} else if tp.Name() == "PhGroupStorage" {
+			gs = arg.(*PhDataStorage.PhGroupStorage)
+		} else if tp.Name() == "PhAccountStorage" {
+			ac = arg.(*PhDataStorage.PhAccountStorage)
 		}
 	}
 	return &PhEmployeeResource{
-		PhEmployeeStroage: cs,
-		PhGroupStroage: gs,
+		PhEmployeeStorage: cs,
+		PhGroupStorage: gs,
+		PhAccountStorage: ac,
 	}
 }
 
-// FindAll images
+// FindAll Employees
 func (c PhEmployeeResource) FindAll(r api2go.Request) (api2go.Responder, error) {
+	accountsId, ok := r.QueryParams["accountsID"]
+	if ok {
+		modelRootID := accountsId[0]
+		modelRoot, err := c.PhAccountStorage.GetOne(modelRootID)
+		if err != nil {
+			return &Response{}, err
+		}
+		modelID := modelRoot.EmployeeID
+		model, err := c.PhEmployeeStorage.GetOne(modelID)
+		if err != nil {
+			return &Response{}, err
+		}
+		return &Response{Res: model}, nil
+	}
+
 	var result []PhModel.Employee
-	result = c.PhEmployeeStroage.GetAll(r, -1, -1)
+	result = c.PhEmployeeStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 
-// FindOne account
+// FindOne Employee
 func (c PhEmployeeResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	model, err := c.PhEmployeeStroage.GetOne(ID)
+	model, err := c.PhEmployeeStorage.GetOne(ID)
 
 	if err != nil {
 		return &Response{}, api2go.NewHTTPError(err, err.Error(), http.StatusNotFound)
 	}
 
 	if model.GroupID != "" {
-		g, err := c.PhGroupStroage.GetOne(model.GroupID)
+		g, err := c.PhGroupStorage.GetOne(model.GroupID)
 		if err != nil {
 			return &Response{}, err
 		}
@@ -59,7 +79,7 @@ func (c PhEmployeeResource) FindOne(ID string, r api2go.Request) (api2go.Respond
 	return &Response{Res: model}, err
 }
 
-// Create a new account
+// Create a new Employee
 func (c PhEmployeeResource) Create(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	account, ok := obj.(PhModel.Employee)
 	if !ok {
@@ -70,18 +90,18 @@ func (c PhEmployeeResource) Create(obj interface{}, r api2go.Request) (api2go.Re
 		)
 	}
 
-	id := c.PhEmployeeStroage.Insert(account)
+	id := c.PhEmployeeStorage.Insert(account)
 	account.ID = id
 	return &Response{Res: account, Code: http.StatusCreated}, nil
 }
 
-// Delete a account :(
+// Delete a Employee :(
 func (c PhEmployeeResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.PhEmployeeStroage.Delete(id)
+	err := c.PhEmployeeStorage.Delete(id)
 	return &Response{Code: http.StatusOK}, err
 }
 
-// Update a account
+// Update a Employee
 func (c PhEmployeeResource) Update(obj interface{}, r api2go.Request) (api2go.Responder, error) {
 	account, ok := obj.(PhModel.Employee)
 	if !ok {
@@ -92,6 +112,6 @@ func (c PhEmployeeResource) Update(obj interface{}, r api2go.Request) (api2go.Re
 		)
 	}
 
-	err := c.PhEmployeeStroage.Update(account)
+	err := c.PhEmployeeStorage.Update(account)
 	return &Response{Res: account, Code: http.StatusNoContent}, err
 }

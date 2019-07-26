@@ -10,19 +10,19 @@ import (
 	"ph_auth/PhModel"
 )
 
-// PhRoleStroage stores all of the tasty modelleaf, needs to be injected into
+// PhRoleStorage stores all of the tasty modelleaf, needs to be injected into
 // Role and Role Resource. In the real world, you would use a database for that.
-type PhRoleStroage struct {
+type PhRoleStorage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s PhRoleStroage) NewStorage(args []BmDaemons.BmDaemon) *PhRoleStroage {
+func (s PhRoleStorage) NewStorage(args []BmDaemons.BmDaemon) *PhRoleStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &PhRoleStroage{db: mdb}
+	return &PhRoleStorage{db: mdb}
 }
 
 // GetAll of the modelleaf
-func (s PhRoleStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.Role {
+func (s PhRoleStorage) GetAll(r api2go.Request, skip int, take int) []PhModel.Role {
 	in := PhModel.Role{}
 	var out []PhModel.Role
 	err := s.db.FindMulti(r, &in, &out, skip, take)
@@ -38,7 +38,7 @@ func (s PhRoleStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.Ro
 }
 
 // GetOne tasty modelleaf
-func (s PhRoleStroage) GetOne(id string) (PhModel.Role, error) {
+func (s PhRoleStorage) GetOne(id string) (PhModel.Role, error) {
 	in := PhModel.Role{ID: id}
 	out := PhModel.Role{ID: id}
 	err := s.db.FindOne(&in, &out)
@@ -50,7 +50,7 @@ func (s PhRoleStroage) GetOne(id string) (PhModel.Role, error) {
 }
 
 // Insert a fresh one
-func (s *PhRoleStroage) Insert(c PhModel.Role) string {
+func (s *PhRoleStorage) Insert(c PhModel.Role) string {
 	tmp, err := s.db.InsertBmObject(&c)
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +60,7 @@ func (s *PhRoleStroage) Insert(c PhModel.Role) string {
 }
 
 // Delete one :(
-func (s *PhRoleStroage) Delete(id string) error {
+func (s *PhRoleStorage) Delete(id string) error {
 	in := PhModel.Role{ID: id}
 	err := s.db.Delete(&in)
 	if err != nil {
@@ -71,7 +71,7 @@ func (s *PhRoleStroage) Delete(id string) error {
 }
 
 // Update updates an existing modelleaf
-func (s *PhRoleStroage) Update(c PhModel.Role) error {
+func (s *PhRoleStorage) Update(c PhModel.Role) error {
 	err := s.db.Update(&c)
 	if err != nil {
 		return fmt.Errorf("Role with id does not exist")

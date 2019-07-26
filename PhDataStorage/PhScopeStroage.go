@@ -10,19 +10,19 @@ import (
 	"ph_auth/PhModel"
 )
 
-// PhScopeStroage stores all of the tasty modelleaf, needs to be injected into
+// PhScopeStorage stores all of the tasty modelleaf, needs to be injected into
 // Scope and Scope Resource. In the real world, you would use a database for that.
-type PhScopeStroage struct {
+type PhScopeStorage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s PhScopeStroage) NewAccountStorage(args []BmDaemons.BmDaemon) *PhScopeStroage {
+func (s PhScopeStorage) NewAccountStorage(args []BmDaemons.BmDaemon) *PhScopeStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &PhScopeStroage{db: mdb}
+	return &PhScopeStorage{db: mdb}
 }
 
 // GetAll of the modelleaf
-func (s PhScopeStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.Scope {
+func (s PhScopeStorage) GetAll(r api2go.Request, skip int, take int) []PhModel.Scope {
 	in := PhModel.Scope{}
 	var out []PhModel.Scope
 	err := s.db.FindMulti(r, &in, &out, skip, take)
@@ -38,7 +38,7 @@ func (s PhScopeStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.S
 }
 
 // GetOne tasty modelleaf
-func (s PhScopeStroage) GetOne(id string) (PhModel.Scope, error) {
+func (s PhScopeStorage) GetOne(id string) (PhModel.Scope, error) {
 	in := PhModel.Scope{ID: id}
 	out := PhModel.Scope{ID: id}
 	err := s.db.FindOne(&in, &out)
@@ -50,7 +50,7 @@ func (s PhScopeStroage) GetOne(id string) (PhModel.Scope, error) {
 }
 
 // Insert a fresh one
-func (s *PhScopeStroage) Insert(c PhModel.Scope) string {
+func (s *PhScopeStorage) Insert(c PhModel.Scope) string {
 	tmp, err := s.db.InsertBmObject(&c)
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +60,7 @@ func (s *PhScopeStroage) Insert(c PhModel.Scope) string {
 }
 
 // Delete one :(
-func (s *PhScopeStroage) Delete(id string) error {
+func (s *PhScopeStorage) Delete(id string) error {
 	in := PhModel.Scope{ID: id}
 	err := s.db.Delete(&in)
 	if err != nil {
@@ -71,7 +71,7 @@ func (s *PhScopeStroage) Delete(id string) error {
 }
 
 // Update updates an existing modelleaf
-func (s *PhScopeStroage) Update(c PhModel.Scope) error {
+func (s *PhScopeStorage) Update(c PhModel.Scope) error {
 	err := s.db.Update(&c)
 	if err != nil {
 		return fmt.Errorf("Scope with id does not exist")

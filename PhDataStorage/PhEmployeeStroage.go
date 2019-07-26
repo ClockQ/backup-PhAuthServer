@@ -10,19 +10,19 @@ import (
 	"ph_auth/PhModel"
 )
 
-// PhEmployeeStroage stores all of the tasty modelleaf, needs to be injected into
+// PhEmployeeStorage stores all of the tasty modelleaf, needs to be injected into
 // Employee and Employee Resource. In the real world, you would use a database for that.
-type PhEmployeeStroage struct {
+type PhEmployeeStorage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s PhEmployeeStroage) NewStorage(args []BmDaemons.BmDaemon) *PhEmployeeStroage {
+func (s PhEmployeeStorage) NewStorage(args []BmDaemons.BmDaemon) *PhEmployeeStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &PhEmployeeStroage{db: mdb}
+	return &PhEmployeeStorage{db: mdb}
 }
 
 // GetAll of the modelleaf
-func (s PhEmployeeStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.Employee {
+func (s PhEmployeeStorage) GetAll(r api2go.Request, skip int, take int) []PhModel.Employee {
 	in := PhModel.Employee{}
 	var out []PhModel.Employee
 	err := s.db.FindMulti(r, &in, &out, skip, take)
@@ -38,7 +38,7 @@ func (s PhEmployeeStroage) GetAll(r api2go.Request, skip int, take int) []PhMode
 }
 
 // GetOne tasty modelleaf
-func (s PhEmployeeStroage) GetOne(id string) (PhModel.Employee, error) {
+func (s PhEmployeeStorage) GetOne(id string) (PhModel.Employee, error) {
 	in := PhModel.Employee{ID: id}
 	out := PhModel.Employee{ID: id}
 	err := s.db.FindOne(&in, &out)
@@ -50,7 +50,7 @@ func (s PhEmployeeStroage) GetOne(id string) (PhModel.Employee, error) {
 }
 
 // Insert a fresh one
-func (s *PhEmployeeStroage) Insert(c PhModel.Employee) string {
+func (s *PhEmployeeStorage) Insert(c PhModel.Employee) string {
 	tmp, err := s.db.InsertBmObject(&c)
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +60,7 @@ func (s *PhEmployeeStroage) Insert(c PhModel.Employee) string {
 }
 
 // Delete one :(
-func (s *PhEmployeeStroage) Delete(id string) error {
+func (s *PhEmployeeStorage) Delete(id string) error {
 	in := PhModel.Employee{ID: id}
 	err := s.db.Delete(&in)
 	if err != nil {
@@ -71,7 +71,7 @@ func (s *PhEmployeeStroage) Delete(id string) error {
 }
 
 // Update updates an existing modelleaf
-func (s *PhEmployeeStroage) Update(c PhModel.Employee) error {
+func (s *PhEmployeeStorage) Update(c PhModel.Employee) error {
 	err := s.db.Update(&c)
 	if err != nil {
 		return fmt.Errorf("Employee with id does not exist")

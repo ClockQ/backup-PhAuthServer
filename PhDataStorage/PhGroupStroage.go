@@ -10,19 +10,19 @@ import (
 	"ph_auth/PhModel"
 )
 
-// PhGroupStroage stores all of the tasty modelleaf, needs to be injected into
+// PhGroupStorage stores all of the tasty modelleaf, needs to be injected into
 // Group and Group Resource. In the real world, you would use a database for that.
-type PhGroupStroage struct {
+type PhGroupStorage struct {
 	db *BmMongodb.BmMongodb
 }
 
-func (s PhGroupStroage) NewStorage(args []BmDaemons.BmDaemon) *PhGroupStroage {
+func (s PhGroupStorage) NewStorage(args []BmDaemons.BmDaemon) *PhGroupStorage {
 	mdb := args[0].(*BmMongodb.BmMongodb)
-	return &PhGroupStroage{db: mdb}
+	return &PhGroupStorage{db: mdb}
 }
 
 // GetAll of the modelleaf
-func (s PhGroupStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.Group {
+func (s PhGroupStorage) GetAll(r api2go.Request, skip int, take int) []PhModel.Group {
 	in := PhModel.Group{}
 	var out []PhModel.Group
 	err := s.db.FindMulti(r, &in, &out, skip, take)
@@ -38,7 +38,7 @@ func (s PhGroupStroage) GetAll(r api2go.Request, skip int, take int) []PhModel.G
 }
 
 // GetOne tasty modelleaf
-func (s PhGroupStroage) GetOne(id string) (PhModel.Group, error) {
+func (s PhGroupStorage) GetOne(id string) (PhModel.Group, error) {
 	in := PhModel.Group{ID: id}
 	out := PhModel.Group{ID: id}
 	err := s.db.FindOne(&in, &out)
@@ -50,7 +50,7 @@ func (s PhGroupStroage) GetOne(id string) (PhModel.Group, error) {
 }
 
 // Insert a fresh one
-func (s *PhGroupStroage) Insert(c PhModel.Group) string {
+func (s *PhGroupStorage) Insert(c PhModel.Group) string {
 	tmp, err := s.db.InsertBmObject(&c)
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +60,7 @@ func (s *PhGroupStroage) Insert(c PhModel.Group) string {
 }
 
 // Delete one :(
-func (s *PhGroupStroage) Delete(id string) error {
+func (s *PhGroupStorage) Delete(id string) error {
 	in := PhModel.Group{ID: id}
 	err := s.db.Delete(&in)
 	if err != nil {
@@ -71,7 +71,7 @@ func (s *PhGroupStroage) Delete(id string) error {
 }
 
 // Update updates an existing modelleaf
-func (s *PhGroupStroage) Update(c PhModel.Group) error {
+func (s *PhGroupStorage) Update(c PhModel.Group) error {
 	err := s.db.Update(&c)
 	if err != nil {
 		return fmt.Errorf("Group with id does not exist")

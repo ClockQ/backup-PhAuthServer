@@ -13,28 +13,28 @@ import (
 
 type PhAccountResource struct {
 	PhAccountStorage *PhDataStorage.PhAccountStorage
-	PhEmployeeStroage *PhDataStorage.PhEmployeeStroage
-	PhRoleStroage *PhDataStorage.PhRoleStroage
+	PhEmployeeStorage *PhDataStorage.PhEmployeeStorage
+	PhRoleStorage *PhDataStorage.PhRoleStorage
 }
 
 func (c PhAccountResource) NewResource(args []BmDataStorage.BmStorage) *PhAccountResource {
 	var cs *PhDataStorage.PhAccountStorage
-	var es *PhDataStorage.PhEmployeeStroage
-	var rs *PhDataStorage.PhRoleStroage
+	var es *PhDataStorage.PhEmployeeStorage
+	var rs *PhDataStorage.PhRoleStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
 		if tp.Name() == "PhAccountStorage" {
 			cs = arg.(*PhDataStorage.PhAccountStorage)
-		} else if tp.Name() == "PhEmployeeStroage" {
-			es = arg.(*PhDataStorage.PhEmployeeStroage)
-		} else if tp.Name() == "PhRoleStroage" {
-			rs = arg.(*PhDataStorage.PhRoleStroage)
+		} else if tp.Name() == "PhEmployeeStorage" {
+			es = arg.(*PhDataStorage.PhEmployeeStorage)
+		} else if tp.Name() == "PhRoleStorage" {
+			rs = arg.(*PhDataStorage.PhRoleStorage)
 		}
 	}
 	return &PhAccountResource{
 		PhAccountStorage: cs,
-		PhEmployeeStroage: es,
-		PhRoleStroage: rs,
+		PhEmployeeStorage: es,
+		PhRoleStorage: rs,
 	}
 }
 
@@ -53,7 +53,7 @@ func (c PhAccountResource) FindOne(ID string, r api2go.Request) (api2go.Responde
 	}
 
 	if model.EmployeeID != "" {
-		e, err := c.PhEmployeeStroage.GetOne(model.EmployeeID)
+		e, err := c.PhEmployeeStorage.GetOne(model.EmployeeID)
 		if err != nil {
 			return &Response{}, err
 		}
@@ -61,7 +61,7 @@ func (c PhAccountResource) FindOne(ID string, r api2go.Request) (api2go.Responde
 	}
 
 	if model.RoleID != "" {
-		role, err := c.PhRoleStroage.GetOne(model.RoleID)
+		role, err := c.PhRoleStorage.GetOne(model.RoleID)
 		if err != nil {
 			return &Response{}, err
 		}

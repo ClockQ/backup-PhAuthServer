@@ -12,32 +12,32 @@ import (
 )
 
 type PhRoleResource struct {
-	PhRoleStroage *PhDataStorage.PhRoleStroage
+	PhRoleStorage *PhDataStorage.PhRoleStorage
 }
 
 func (c PhRoleResource) NewResource(args []BmDataStorage.BmStorage) *PhRoleResource {
-	var cs *PhDataStorage.PhRoleStroage
+	var cs *PhDataStorage.PhRoleStorage
 	for _, arg := range args {
 		tp := reflect.ValueOf(arg).Elem().Type()
-		if tp.Name() == "PhRoleStroage" {
-			cs = arg.(*PhDataStorage.PhRoleStroage)
+		if tp.Name() == "PhRoleStorage" {
+			cs = arg.(*PhDataStorage.PhRoleStorage)
 		}
 	}
 	return &PhRoleResource{
-		PhRoleStroage: cs,
+		PhRoleStorage: cs,
 	}
 }
 
 // FindAll images
 func (c PhRoleResource) FindAll(r api2go.Request) (api2go.Responder, error) {
 	var result []PhModel.Role
-	result = c.PhRoleStroage.GetAll(r, -1, -1)
+	result = c.PhRoleStorage.GetAll(r, -1, -1)
 	return &Response{Res: result}, nil
 }
 
 // FindOne account
 func (c PhRoleResource) FindOne(ID string, r api2go.Request) (api2go.Responder, error) {
-	res, err := c.PhRoleStroage.GetOne(ID)
+	res, err := c.PhRoleStorage.GetOne(ID)
 	return &Response{Res: res}, err
 }
 
@@ -52,14 +52,14 @@ func (c PhRoleResource) Create(obj interface{}, r api2go.Request) (api2go.Respon
 		)
 	}
 
-	id := c.PhRoleStroage.Insert(account)
+	id := c.PhRoleStorage.Insert(account)
 	account.ID = id
 	return &Response{Res: account, Code: http.StatusCreated}, nil
 }
 
 // Delete a account :(
 func (c PhRoleResource) Delete(id string, r api2go.Request) (api2go.Responder, error) {
-	err := c.PhRoleStroage.Delete(id)
+	err := c.PhRoleStorage.Delete(id)
 	return &Response{Code: http.StatusOK}, err
 }
 
@@ -74,6 +74,6 @@ func (c PhRoleResource) Update(obj interface{}, r api2go.Request) (api2go.Respon
 		)
 	}
 
-	err := c.PhRoleStroage.Update(account)
+	err := c.PhRoleStorage.Update(account)
 	return &Response{Res: account, Code: http.StatusNoContent}, err
 }
