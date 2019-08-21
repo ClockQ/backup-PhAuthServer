@@ -1,6 +1,7 @@
 package PhServer
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
@@ -108,16 +109,26 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 		cond := bson.M{"_id": bson.ObjectIdHex(userID)}
 		err = mdb.FindOneByCondition(&accRes, &accOut, cond)
 		if err != nil {
-			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusFound)
+			enc := json.NewEncoder(w)
+			enc.Encode( map[string]interface{}{
+				"status" : "error",
+				"msg": "用户信息不正确",
+			})
 			return
 		}
 
 		empModel := PhModel.Employee{}
 		err = mdb.FindOneByCondition(&empModel, &empModel, bson.M{"_id": bson.ObjectIdHex(accOut.EmployeeID)})
 		if err != nil {
-			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusFound)
+			enc := json.NewEncoder(w)
+			enc.Encode( map[string]interface{}{
+				"status" : "error",
+				"msg": "员工信息不正确",
+			})
 			return
 		}
 
@@ -135,8 +146,13 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 				scopeModels[i] = iter
 			}
 		} else {
-			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusFound)
+			enc := json.NewEncoder(w)
+			enc.Encode( map[string]interface{}{
+				"status" : "error",
+				"msg": "组信息不正确",
+			})
 			return
 		}
 
@@ -149,8 +165,13 @@ func authorizeScopeHandler(mdb *BmMongodb.BmMongodb) (handler func(w http.Respon
 			scope = level + "/" + scop
 			return
 		} else {
-			w.Header().Set("Location", "http://www.pharbers.com") // TODO：暂定跳转官网
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusFound)
+			enc := json.NewEncoder(w)
+			enc.Encode( map[string]interface{}{
+				"status" : "error",
+				"msg": "Scope作用域信息不正确或过期",
+			})
 			return
 		}
 
