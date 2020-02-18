@@ -19,6 +19,7 @@ var PhModelFactory = map[string]interface{}{
 	"PhGroup": PhModel.Group{},
 	"PhCompany": PhModel.Company{},
 	"PhRole": PhModel.Role{},
+	"PhApplyuser": PhModel.Applyuser{},
 }
 
 var PhStorageFactory = map[string]interface{}{
@@ -27,6 +28,7 @@ var PhStorageFactory = map[string]interface{}{
 	"PhGroupStorage": PhDataStorage.PhGroupStorage{},
 	"PhCompanyStorage": PhDataStorage.PhCompanyStorage{},
 	"PhRoleStorage": PhDataStorage.PhRoleStorage{},
+	"PhApplyuserStorage": PhDataStorage.PhApplyuserStorage{},
 }
 
 var PhResourceFactory = map[string]interface{}{
@@ -35,6 +37,7 @@ var PhResourceFactory = map[string]interface{}{
 	"PhGroupResource": PhResource.PhGroupResource{},
 	"PhCompanyResource": PhResource.PhCompanyResource{},
 	"PhRoleResource": PhResource.PhRoleResource{},
+	"PhApplyuserResource": PhResource.PhApplyuserResource{},
 }
 
 var PhFunctionFactory = map[string]interface{}{

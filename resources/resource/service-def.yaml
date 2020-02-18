@@ -4,6 +4,7 @@ models:
 - PhGroup
 - PhCompany
 - PhRole
+- PhApplyuser
 
 storages:
 - name: PhAccountStorage
@@ -26,6 +27,10 @@ storages:
   method: NewStorage
   daemons:
   - BmMongodbDaemon
+- name: PhApplyuserStorage
+  method: NewApplyuserStorage
+  daemons:
+    - BmMongodbDaemon
 
 resources:
 - name: PhAccountResource
@@ -54,6 +59,10 @@ resources:
   method: NewResource
   storages:
   - PhRoleStorage
+- name: PhApplyuserResource
+  method: NewApplyuserResource
+  storages:
+  - PhApplyuserStorage
 
 services:
 - name: ph-account
@@ -71,6 +80,9 @@ services:
 - name: ph-role
   model: PhRole
   resource: PhRoleResource
+- name: ph-applyuser
+  model: PhApplyuser
+  resource: PhApplyuserResource
 
 functions:
 - name: PhLoginPageHandler
