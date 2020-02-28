@@ -1,5 +1,5 @@
-#源镜像
-FROM    golang:1.12.4-alpine
+# builder 源镜像
+FROM    golang:1.12.4-alpine as builder
 
 # 安装git
 RUN     apk add --no-cache git gcc musl-dev
@@ -9,22 +9,38 @@ LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.23"
 
 # 设置工程配置文件的环境变量 && 开启go-module
 ENV     PH_AUTH_HOME $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer/resources
+ENV     GOPROXY https://goproxy.io
 ENV     GO111MODULE on
 
-# 下载依赖
-RUN     git clone https://github.com/PharbersDeveloper/PhAuthServer $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer && \
-        ln -sf $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer/static  $GOPATH/bin/static
+RUN     git clone https://github.com/PharbersDeveloper/PhAuthServer $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer
 
 # 设置工作目录
 WORKDIR $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer
 
 # 构建可执行文件
-RUN     go build -a && go install
+RUN     go build
+#-a && go install
 
-# 暴露端口
-EXPOSE  9096
+
+FROM    alpine:latest
+
+WORKDIR /go/src/github.com/PharbersDeveloper/PhAuthServer/resources/resource
+ENV     PH_AUTH_HOME=/go/src/github.com/PharbersDeveloper/PhAuthServer/resources
+
+RUN echo http://mirrors.aliyun.com/alpine/edge/main > /etc/apk/repositories \
+    && echo http://mirrors.aliyun.com/alpine/edge/community >> /etc/apk/repositories \
+    && apk update \
+    && apk add --no-cache tzdata bash \
+    && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && apk del tzdata \
+    && rm -rf /var/cache/apk/*
 
 # 设置工作目录
-WORKDIR $GOPATH/bin
+WORKDIR /go/bin
 
-ENTRYPOINT ["ph_auth"]
+COPY --from=0 /go/src/github.com/PharbersDeveloper/PhAuthServer/ph_auth .
+
+# 暴露端口
+EXPOSE  30000
+#ENTRYPOINT ["./ph_auth"]

@@ -10,20 +10,11 @@ import (
 	"os"
 	"ph_auth/PhClient"
 	"ph_auth/PhFactory"
-	"time"
 
 	"github.com/alfredyang1986/BmServiceDef/BmApiResolver"
 	"github.com/alfredyang1986/BmServiceDef/BmConfig"
 	"github.com/alfredyang1986/BmServiceDef/BmPodsDefine"
 )
-
-func init() {
-	fmt.Println("当前时区 => ", time.Local.String())
-	if time.Local.String() == "UTC" {
-		location := time.FixedZone("CST", 8*3600)
-		time.Local = location
-	}
-}
 
 func main() {
 	const (

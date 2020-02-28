@@ -90,13 +90,13 @@ functions:
   method: Login
   http: GET
   args:
-  - static/login.html
+  - /go/src/github.com/PharbersDeveloper/PhAuthServer/resources/resource/static/login.html
 - name: PhAuthPageHandler
   create: NewAuthPageHandler
   method: Auth
   http: GET
   args:
-  - static/auth.html
+  - /go/src/github.com/PharbersDeveloper/PhAuthServer/resources/resource/static/auth.html
 - name: PhAccountHandler
   create: NewAccountHandler
   daemons:
@@ -107,8 +107,8 @@ functions:
   args:
   - Auth
   - Authorize
-#  - http://192.168.100.116:9096
-  - http://oauth.pharbers.com
+  - http://oauth-service-svc:30000
+#  - http://oauth.pharbers.com
 - name: PhTokenHandler
   create: NewTokenHandler
   daemons:
