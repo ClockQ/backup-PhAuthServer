@@ -90,13 +90,13 @@ functions:
   method: Login
   http: GET
   args:
-  - /go/src/github.com/PharbersDeveloper/PhAuthServer/resources/resource/static/login.html
+  - static/login.html
 - name: PhAuthPageHandler
   create: NewAuthPageHandler
   method: Auth
   http: GET
   args:
-  - /go/src/github.com/PharbersDeveloper/PhAuthServer/resources/resource/static/auth.html
+  - static/auth.html
 - name: PhAccountHandler
   create: NewAccountHandler
   daemons:
@@ -211,13 +211,13 @@ daemons:
 - name: BmMongodbDaemon
   method: NewMongoDBDaemon
   args:
-    host: mongo
-    port: 27017
+    host: starLord
+    port: 30010
     database: pharbers-auth-server
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
-    host: redis
-    port: 6379
+    host: starLord
+    port: 30011
     password:
     database: 0
