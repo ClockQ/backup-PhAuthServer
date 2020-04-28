@@ -102,6 +102,7 @@ func (a *Account) GetConditionsBsonM(parameters map[string][]string) bson.M {
 	rst := make(map[string]interface{})
 	r := make(map[string]interface{})
 	var ids []bson.ObjectId
+	var employeeIds []string
 	for k, v := range parameters {
 		switch k {
 		case "ids":
@@ -110,6 +111,12 @@ func (a *Account) GetConditionsBsonM(parameters map[string][]string) bson.M {
 			}
 			r["$in"] = ids
 			rst["_id"] = r
+		case "employee-ids":
+			for i := 0; i < len(v); i++ {
+				employeeIds = append(employeeIds,v[i])
+			}
+			r["$in"] = employeeIds
+			rst["employee-id"] = r
 		}
 	}
 	return rst

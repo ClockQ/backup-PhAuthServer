@@ -44,6 +44,7 @@ resources:
   storages:
   - PhEmployeeStorage
   - PhGroupStorage
+  - PhAccountStorage
 - name: PhGroupResource
   method: NewResource
   storages:
@@ -107,8 +108,9 @@ functions:
   args:
   - Auth
   - Authorize
-  - http://oauth-service-svc:30000
-#  - http://oauth.pharbers.com
+#  - http://oauth-service-svc:30000
+  - http://oauth.pharbers.com
+#  - http://192.168.100.116:9096
 - name: PhTokenHandler
   create: NewTokenHandler
   daemons:
@@ -211,13 +213,13 @@ daemons:
 - name: BmMongodbDaemon
   method: NewMongoDBDaemon
   args:
-    host: starLord
-    port: 30010
+    host: mongo
+    port: 27017
     database: pharbers-auth-server
 - name: BmRedisDaemon
   method: NewRedisDBDaemon
   args:
-    host: starLord
-    port: 30011
+    host: redis
+    port: 6379
     password:
     database: 0

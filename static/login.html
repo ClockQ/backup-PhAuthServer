@@ -33,25 +33,6 @@
 </body>
 
 <script type="text/javascript" >
-    //   document.getElementById("authSubmit").addEventListener('click', function(){
-    //     var xhttp;
-    //     xhttp=new XMLHttpRequest();
-    //     xhttp.onreadystatechange = function() {
-    //         if (this.readyState == 4 && this.status == 200) {
-    //             window.console.info(this.response)
-    //             // window.location = this.response
-    //             alert(123)
-    //         }
-    //     };
-    //
-    //     // xhttp.open("POST", `http://oauth.pharbers.com/v0/AccountValidation${decodeURI($('#parameter').val())}`, true);
-    //     xhttp.open("POST", `http://192.168.100.116:9096/v0/AccountValidation${decodeURI($('#parameter').val())}`, true);
-    //
-    //     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    //     xhttp.send(`username=${document.getElementById("username").value}&password=${document.getElementById("password").value}`);
-    //
-    // }, false);
-
     $(function(){
         var url = `http://oauth.pharbers.com/v0/AccountValidation${decodeURI($('#parameter').val())}`;
         // var url = `http://192.168.100.116:9096/v0/AccountValidation${decodeURI($('#parameter').val())}`;

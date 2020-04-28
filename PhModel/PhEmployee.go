@@ -72,5 +72,25 @@ func (u *Employee) SetToOneReferenceID(name, ID string) error {
 }
 
 func (a *Employee) GetConditionsBsonM(parameters map[string][]string) bson.M {
-	return bson.M{}
+	rst := make(map[string]interface{})
+	r := make(map[string]interface{})
+	var ids []bson.ObjectId
+	var groupIds []string
+	for k, v := range parameters {
+		switch k {
+		case "ids":
+			for i := 0; i < len(v); i++ {
+				ids = append(ids, bson.ObjectIdHex(v[i]))
+			}
+			r["$in"] = ids
+			rst["_id"] = r
+		case "group-ids":
+			for i := 0; i < len(v); i++ {
+				groupIds = append(groupIds,v[i])
+			}
+			r["$in"] = groupIds
+			rst["group-id"] = r
+		}
+	}
+	return rst
 }

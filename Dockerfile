@@ -7,6 +7,7 @@ RUN     apk add --no-cache git gcc musl-dev
 #LABEL 更改version后，本地build时LABEL以上的Steps使用Cache
 LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.24"
 
+
 # 设置工程配置文件的环境变量 && 开启go-module
 ENV     PH_AUTH_HOME $GOPATH/src/github.com/PharbersDeveloper/PhAuthServer/resources
 ENV     GOPROXY https://goproxy.io
@@ -42,5 +43,5 @@ WORKDIR /go/bin
 COPY --from=0 /go/src/github.com/PharbersDeveloper/PhAuthServer/ph_auth .
 
 # 暴露端口
-EXPOSE  30000
-#ENTRYPOINT ["./ph_auth"]
+EXPOSE  9096
+ENTRYPOINT ["./ph_auth"]
