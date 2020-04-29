@@ -46,6 +46,7 @@ func main() {
 	pod.RegisterAllMiddleware(api)
 
 	c := cors.New(cors.Options{
+		AllowedHeaders: []string{"*"},
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "POST"},
 	})
