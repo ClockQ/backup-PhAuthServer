@@ -55,6 +55,7 @@ var PhFunctionFactory = map[string]interface{}{
 	"PhForgetPasswordHandler": 		PhHandler.PhAccountHandler{},
 	"PhVerifyUUIDHandler": 			PhHandler.PhAccountHandler{},
 	"PhUpdatePasswordHandler": 		PhHandler.PhAccountHandler{},
+	"PhGetAccountsHandler": 		PhHandler.PhGetAccountsHandler{},
 
 }
 var PhMiddlewareFactory = map[string]interface{}{
