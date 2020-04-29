@@ -9,6 +9,7 @@ import (
 	"github.com/manyminds/api2go"
 	"io/ioutil"
 	"net/http"
+	"ph_auth/PhMiddleware"
 	"ph_auth/PhModel"
 	"reflect"
 )
@@ -58,6 +59,13 @@ func (h PhGetAccountsHandler) NewGetAccountsHandle(args ...interface{}) PhGetAcc
 
 func (h PhGetAccountsHandler) GetAccounts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
 	w.Header().Add("Content-Type", "application/json")
+	token := PhMiddleware.PhCheckTokenMiddleware{Args: h.Args, Md: h.db, Rd: h.rd}
+	err := token.CheckTokenFormFunction(w,r)
+	if err != nil {
+		panic(err.Error())
+	}
+
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(err.Error())

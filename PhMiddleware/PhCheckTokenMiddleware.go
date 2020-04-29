@@ -16,8 +16,8 @@ var PhCheckToken PhCheckTokenMiddleware
 
 type PhCheckTokenMiddleware struct {
 	Args []string
-	rd   *BmRedis.BmRedis
-	md   *BmMongodb.BmMongodb
+	Rd   *BmRedis.BmRedis
+	Md   *BmMongodb.BmMongodb
 }
 
 func (ctm PhCheckTokenMiddleware) NewCheckTokenMiddleware(args ...interface{}) PhCheckTokenMiddleware {
@@ -46,7 +46,7 @@ func (ctm PhCheckTokenMiddleware) NewCheckTokenMiddleware(args ...interface{}) P
 		}
 	}
 
-	PhCheckToken = PhCheckTokenMiddleware{Args: ag, rd: r, md:m}
+	PhCheckToken = PhCheckTokenMiddleware{Args: ag, Rd: r, Md:m}
 	return PhCheckToken
 }
 
@@ -62,7 +62,7 @@ func (ctm PhCheckTokenMiddleware) DoMiddleware(c api2go.APIContexter, w http.Res
 func (ctm PhCheckTokenMiddleware) CheckTokenFormFunction(w http.ResponseWriter, r *http.Request) (err error) {
 	w.Header().Add("Content-Type", "application/json")
 
-	sv := PhServer.GetInstance(ctm.md, ctm.rd)
+	sv := PhServer.GetInstance(ctm.Md, ctm.Rd)
 	token, err := sv.ValidationBearerToken(r)
 	if err != nil {
 		panic(err.Error())
