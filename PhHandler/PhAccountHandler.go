@@ -9,6 +9,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/go-redis/redis"
 	"github.com/julienschmidt/httprouter"
+	"github.com/manyminds/api2go"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"log"
@@ -295,6 +296,120 @@ func (h PhAccountHandler) UpdatePassword(w http.ResponseWriter, r *http.Request,
 	enc := json.NewEncoder(w)
 	enc.Encode(response)
 	return 1
+}
+
+func (h PhAccountHandler) GetAccounts(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	w.Header().Add("Content-Type", "application/json")
+
+	// 注释掉token验证
+	//token := PhMiddleware.PhCheckTokenMiddleware{Args: h.Args, Md: h.db, Rd: h.rd}
+	//err := token.CheckTokenFormFunction(w, r)
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var parameter map[string]string
+	err = json.Unmarshal(body, &parameter)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	accountIn := PhModel.Account{ID: parameter["account"]}
+	accountOut := PhModel.Account{}
+	h.db.FindOne(&accountIn, &accountOut)
+
+	if accountOut.ID == "" {
+		panic("Account is Error")
+	}
+
+	employeeIn := PhModel.Employee{ID: accountOut.EmployeeID}
+	employeeOut := PhModel.Employee{ID: accountOut.EmployeeID}
+	h.db.FindOne(&employeeIn, &employeeOut)
+
+	var employeeOuts []PhModel.Employee
+	p := api2go.Request{
+		QueryParams: map[string][]string{
+			"group-ids": {employeeOut.GroupID},
+		},
+	}
+	err = h.db.FindMulti(p, &PhModel.Employee{}, &employeeOuts, -1, -1)
+	if err == nil {
+		for i, iter := range employeeOuts {
+			h.db.ResetIdWithId_(&iter)
+			employeeOuts[i] = iter
+		}
+	} else {
+		panic(err.Error())
+	}
+
+	var employeeIds []string
+	for _, v := range employeeOuts {
+		employeeIds = append(employeeIds, v.ID)
+	}
+
+	p = api2go.Request{
+		QueryParams: map[string][]string{
+			"employee-ids": employeeIds,
+		},
+	}
+	var accountOuts []PhModel.Account
+	err = h.db.FindMulti(p, &PhModel.Account{}, &accountOuts, -1, -1)
+	if err == nil {
+		for i, iter := range accountOuts {
+			h.db.ResetIdWithId_(&iter)
+			accountOuts[i] = iter
+		}
+	} else {
+		panic(err.Error())
+	}
+
+	var accountIds []string
+	for _, v := range accountOuts {
+		accountIds = append(accountIds, v.ID)
+	}
+
+	enc := json.NewEncoder(w)
+	enc.Encode(accountIds)
+	return 0
+}
+
+func (h PhAccountHandler) GetAccountNameById(w http.ResponseWriter, r *http.Request, _ httprouter.Params) int {
+	w.Header().Add("Content-Type", "application/json")
+
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var parameter map[string]string
+	err = json.Unmarshal(body, &parameter)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	accountIn := PhModel.Account{ID: parameter["account"]}
+	accountOut := PhModel.Account{}
+	h.db.FindOne(&accountIn, &accountOut)
+
+	if accountOut.ID == "" {
+		panic("Account is Error")
+	}
+
+	result := map[string]string{
+		"accountId": 	accountOut.ID,
+		"accountName": 	accountOut.Username,
+	}
+
+	enc := json.NewEncoder(w)
+	enc.Encode(result)
+
+	return 0
 }
 
 func (h PhAccountHandler) GetHttpMethod() string {

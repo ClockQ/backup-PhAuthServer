@@ -5,7 +5,7 @@ FROM    golang:1.12.4-alpine as builder
 RUN     apk add --no-cache git gcc musl-dev
 
 #LABEL 更改version后，本地build时LABEL以上的Steps使用Cache
-LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.27"
+LABEL   maintainer="czhang@pharbers.com" PhAuthServer.version="1.0.28"
 
 
 # 设置工程配置文件的环境变量 && 开启go-module

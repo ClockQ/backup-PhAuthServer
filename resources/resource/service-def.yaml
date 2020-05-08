@@ -86,15 +86,6 @@ services:
   resource: PhApplyuserResource
 
 functions:
-- name: PhGetAccountsHandler
-  create: NewGetAccountsHandle
-  daemons:
-  - BmMongodbDaemon
-  - BmRedisDaemon
-  method: GetAccounts
-  http: POST
-  args:
-  - name
 - name: PhLoginPageHandler
   create: NewLoginPageHandler
   method: Login
@@ -183,7 +174,6 @@ functions:
   - mail:60106
   - SendMail
   - http://www.pharbers.com
-
 - name: PhVerifyUUIDHandler
   create: NewAccountHandler
   daemons:
@@ -193,13 +183,30 @@ functions:
   http: POST
   args:
   - name
-
 - name: PhUpdatePasswordHandler
   create: NewAccountHandler
   daemons:
   - BmMongodbDaemon
   - BmRedisDaemon
   method: UpdatePassword
+  http: POST
+  args:
+  - name
+- name: PhGetAccountsHandler
+  create: NewAccountHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: GetAccounts
+  http: POST
+  args:
+  - name
+- name: PhGetAccountNameByIdHandler
+  create: NewAccountHandler
+  daemons:
+  - BmMongodbDaemon
+  - BmRedisDaemon
+  method: GetAccountNameById
   http: POST
   args:
   - name
