@@ -1,4 +1,4 @@
-module ph_auth
+module github.com/PharbersDeveloper/PhAuthServer
 
 replace golang.org/x/text => github.com/golang/text v0.3.0
 
@@ -22,16 +22,22 @@ go 1.12
 
 require (
 	github.com/alfredyang1986/BmServiceDef v0.0.1
-	github.com/alfredyang1986/blackmirror v0.0.3
-	github.com/gavv/httpexpect v1.0.0 // indirect
+	github.com/alfredyang1986/blackmirror v0.0.3 // indirect
+	github.com/gavv/httpexpect v1.0.0
 	github.com/gedex/inflector v0.0.0-20170307190818-16278e9db813 // indirect
+	github.com/gin-gonic/gin v1.6.3 // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
+	github.com/gorilla/mux v1.7.4 // indirect
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/julienschmidt/httprouter v1.2.0
+	github.com/labstack/echo v3.3.10+incompatible // indirect
+	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/manyminds/api2go v0.0.0-20190324173508-d4f7fae65b4b
 	github.com/rs/cors v1.6.0
-	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a // indirect
+	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	golang.org/x/oauth2 v0.0.0-00010101000000-000000000000
+	gopkg.in/guregu/null.v2 v2.1.2 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/oauth2.v3 v3.10.0
-	gopkg.in/yaml.v2 v2.2.2 // indirect
+	gopkg.in/yaml.v2 v2.2.8
 )
