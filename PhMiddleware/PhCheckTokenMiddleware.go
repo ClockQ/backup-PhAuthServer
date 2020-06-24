@@ -7,7 +7,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"github.com/manyminds/api2go"
 	"net/http"
-	"ph_auth/PhServer"
+	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
 	"reflect"
 	"strings"
 )

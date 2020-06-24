@@ -5,8 +5,8 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDataStorage"
 	"github.com/manyminds/api2go"
 	"net/http"
-	"ph_auth/PhDataStorage"
-	"ph_auth/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhDataStorage"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"reflect"
 	"strconv"
 )

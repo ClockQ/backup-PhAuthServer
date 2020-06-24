@@ -10,7 +10,7 @@ import (
 	"reflect"
 
 	"encoding/json"
-	"ph_auth/PhServer"
+	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
 	"time"
 )
 

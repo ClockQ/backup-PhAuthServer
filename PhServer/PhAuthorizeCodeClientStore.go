@@ -7,7 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
-	"ph_auth/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 )
 
 func NewAuthorizeCodeClientStore(mdb *BmMongodb.BmMongodb) *PhAuthorizeCodeClientStore {

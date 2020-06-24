@@ -5,7 +5,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
 	"gopkg.in/oauth2.v3"
 	"gopkg.in/oauth2.v3/models"
-	"ph_auth/PhUnits/uuid"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/uuid"
 	"time"
 )
 

@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"ph_auth/PhClient"
+	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
 	"reflect"
 	"strings"
 )

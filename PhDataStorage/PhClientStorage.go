@@ -7,7 +7,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/manyminds/api2go"
 	"net/http"
-	"ph_auth/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 )
 
 // PhClientStorage stores all of the tasty modelleaf, needs to be injected into

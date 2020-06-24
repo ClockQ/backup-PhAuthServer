@@ -15,9 +15,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"ph_auth/PhClient"
-	"ph_auth/PhModel"
-	"ph_auth/PhServer"
+	"github.com/PharbersDeveloper/PhAuthServer/PhClient"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
 	"reflect"
 	"time"
 )

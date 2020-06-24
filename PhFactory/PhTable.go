@@ -3,12 +3,12 @@ package PhFactory
 import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmRedis"
-	"ph_auth/PhMiddleware"
+	"github.com/PharbersDeveloper/PhAuthServer/PhMiddleware"
 
-	"ph_auth/PhDataStorage"
-	"ph_auth/PhHandler"
-	"ph_auth/PhModel"
-	"ph_auth/PhResource"
+	"github.com/PharbersDeveloper/PhAuthServer/PhDataStorage"
+	"github.com/PharbersDeveloper/PhAuthServer/PhHandler"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhResource"
 )
 
 type PhTable struct{}

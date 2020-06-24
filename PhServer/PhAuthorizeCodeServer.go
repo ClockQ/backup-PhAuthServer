@@ -12,7 +12,7 @@ import (
 	"gopkg.in/oauth2.v3/server"
 	"log"
 	"net/http"
-	"ph_auth/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 	"strings"
 	"time"
 )

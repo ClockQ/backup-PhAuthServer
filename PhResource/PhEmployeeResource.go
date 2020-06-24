@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"reflect"
 
-	"ph_auth/PhDataStorage"
-	"ph_auth/PhModel"
+	"github.com/PharbersDeveloper/PhAuthServer/PhDataStorage"
+	"github.com/PharbersDeveloper/PhAuthServer/PhModel"
 )
 
 type PhEmployeeResource struct {

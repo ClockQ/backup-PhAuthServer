@@ -4,7 +4,7 @@ import (
 	"github.com/alfredyang1986/BmServiceDef/BmDaemons/BmMongodb"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/oauth2.v3/models"
-	"ph_auth/PhUnits/yaml"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/yaml"
 	"testing"
 )
 

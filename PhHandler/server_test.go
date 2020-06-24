@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"ph_auth/PhServer"
-	"ph_auth/PhUnits/yaml"
+	"github.com/PharbersDeveloper/PhAuthServer/PhServer"
+	"github.com/PharbersDeveloper/PhAuthServer/PhUnits/yaml"
 	"testing"
 )
 
