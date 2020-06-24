@@ -68,6 +68,9 @@ func (h PhUserAgentHandler) ThirdParty(w http.ResponseWriter, r *http.Request, _
 		// 转发
 		client := &http.Client{}
 		req, _ := http.NewRequest("GET", redirectUrl, nil)
+		req.Header = map[string][]string{
+			"Accept-Encoding": []string{""},
+		}
 		for k, v := range r.Header {
 			req.Header.Add(k, v[0])
 		}
